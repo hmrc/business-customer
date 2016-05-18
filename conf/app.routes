@@ -1,0 +1,7 @@
+# microservice specific routes
+
+POST    /agent/:utr/business-customer/register            controllers.AgentBusinessRegistrationController.register(utr: String)
+POST    /org/:utr/business-customer/register              controllers.BusinessRegistrationController.register(utr: String)
+POST    /sa/:utr/business-customer/register               controllers.SaBusinessRegistrationController.register(utr: String)
+
+POST    /agent/:utr/business-customer/:serviceName/known-facts controllers.AddKnownFactsController.addKnownFacts(utr: String, serviceName: String)
