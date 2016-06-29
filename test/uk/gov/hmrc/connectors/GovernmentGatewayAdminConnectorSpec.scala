@@ -51,6 +51,8 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
   val mockWSHttp = mock[MockHttp]
 
   object TestGGAdminConnector extends GovernmentGatewayAdminConnector {
+    override val serviceUrl = ""
+    override val ggaBaseUrl = ""
     override val http: HttpGet with HttpPost = mockWSHttp
     override val audit: Audit = new TestAudit
     override val appName: String = "Test"
@@ -79,6 +81,7 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
       val result = TestGGAdminConnector.addKnownFacts("ATED", knownFacts)
       await(result).status must be(OK)
     }
+
     "for unsuccessful call of known facts, return response" in {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).
@@ -88,5 +91,7 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
       val result = TestGGAdminConnector.addKnownFacts("ATED", knownFacts)
       await(result).status must be(INTERNAL_SERVER_ERROR)
     }
+
   }
+
 }

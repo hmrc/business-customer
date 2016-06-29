@@ -25,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BusinessRegistrationController extends BaseController {
 
-  val desConnector: EtmpConnector
+  def desConnector: EtmpConnector
 
   def register(utr: String) = Action.async {
     implicit request =>
@@ -44,19 +44,17 @@ trait BusinessRegistrationController extends BaseController {
           }
       }
   }
+
 }
 
 object BusinessRegistrationController extends BusinessRegistrationController {
   val desConnector: EtmpConnector = EtmpConnector
-  val ggAdminConnector: GovernmentGatewayAdminConnector = GovernmentGatewayAdminConnector
 }
 
 object SaBusinessRegistrationController extends BusinessRegistrationController {
   val desConnector: EtmpConnector = EtmpConnector
-  val ggAdminConnector: GovernmentGatewayAdminConnector = GovernmentGatewayAdminConnector
 }
 
 object AgentBusinessRegistrationController extends BusinessRegistrationController {
   val desConnector: EtmpConnector = EtmpConnector
-  val ggAdminConnector: GovernmentGatewayAdminConnector = GovernmentGatewayAdminConnector
 }

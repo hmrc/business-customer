@@ -26,10 +26,11 @@ trait Auditable {
 
   def audit: Audit
 
-  def sendDataEvent(transactionName: String, path: String = "N/A",
+  def sendDataEvent(transactionName: String,
+                    path: String = "N/A",
                     tags: Map[String, String] = Map.empty[String, String],
-                    detail: Map[String, String], eventType: String)
-                   (implicit hc: HeaderCarrier): Unit =
+                    detail: Map[String, String],
+                    eventType: String)(implicit hc: HeaderCarrier): Unit =
     audit.sendDataEvent(DataEvent(appName, auditType = eventType,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)))
