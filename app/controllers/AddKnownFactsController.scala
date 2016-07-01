@@ -24,7 +24,8 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait AddKnownFactsController extends BaseController {
-  val ggAdminConnector: GovernmentGatewayAdminConnector
+
+  def ggAdminConnector: GovernmentGatewayAdminConnector
 
   def addKnownFacts(utr: String, serviceName: String) = Action.async {
     implicit request =>
@@ -33,14 +34,14 @@ trait AddKnownFactsController extends BaseController {
         addKnownFactResponse =>
           addKnownFactResponse.status match {
             case OK => Ok(addKnownFactResponse.body)
-            case _ => {
+            case _ =>
               Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
                 s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
               Ok(addKnownFactResponse.body)
-            }
           }
       }
   }
+
 }
 
 object AddKnownFactsController extends AddKnownFactsController {

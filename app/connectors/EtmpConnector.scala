@@ -32,31 +32,32 @@ import scala.concurrent.Future
 
 trait EtmpConnector extends ServicesConfig with Auditable {
 
-  lazy val serviceURL = baseUrl("etmp-hod")
-  val baseURI = ""
-  val registerURI = "/registration/organisation"
-  val urlHeaderEnvironment: String
-  val urlHeaderAuthorization: String
+  def serviceUrl: String
+
+  def registerUri: String
+
+  def urlHeaderEnvironment: String
+
+  def urlHeaderAuthorization: String
 
   def metrics: Metrics
 
-  val http: HttpGet with HttpPost = WSHttp
+  def http: HttpGet with HttpPost
 
-  def register(registerData: JsValue)(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] = {
-    implicit val headerCarrier = createHeaderCarrier
+  def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    implicit val hc = createHeaderCarrier
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-    http.POST(s"""$serviceURL$baseURI$registerURI""", registerData).map { response =>
-      val stopContext = timerContext.stop()
+    http.POST(s"$serviceUrl$registerUri", registerData).map { response =>
+      timerContext.stop()
       auditRegister(registerData, response)
       response.status match {
         case OK =>
           metrics.incrementSuccessCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
           response
-        case status => {
+        case status =>
           metrics.incrementFailedCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
           Logger.warn(s"[ETMPConnector][register] - status: $status Error: ${response.body}")
           response
-        }
       }
     }
   }
@@ -68,23 +69,24 @@ trait EtmpConnector extends ServicesConfig with Auditable {
     }
     sendDataEvent(transactionName = "etmpRegister",
       detail = Map("txName" -> "etmpRegister",
-        "registerData" -> s"${registerData}",
+        "registerData" -> s"$registerData",
         "responseStatus" -> s"${response.status}",
         "responseBody" -> s"${response.body}"),
       eventType = eventType)
   }
 
-  def createHeaderCarrier(): HeaderCarrier = {
+  def createHeaderCarrier: HeaderCarrier =
     HeaderCarrier(extraHeaders = Seq("Environment" -> urlHeaderEnvironment), authorization = Some(Authorization(urlHeaderAuthorization)))
-  }
+
 }
 
 object EtmpConnector extends EtmpConnector {
-  override val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
-  override val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
-
-  override val audit: Audit = new Audit(AppName.appName, MicroserviceAuditConnector)
-  override val appName: String = AppName.appName
-
-  override def metrics = Metrics
+  val serviceUrl = baseUrl("etmp-hod")
+  val registerUri = "/registration/organisation"
+  val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
+  val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
+  val metrics = Metrics
+  val http = WSHttp
+  val audit: Audit = new Audit(AppName.appName, MicroserviceAuditConnector)
+  val appName: String = AppName.appName
 }
