@@ -2,7 +2,7 @@ business-customer
 =============
 Business customer microservice
 
-[![Build Status](https://travis-ci.org/hmrc/business-customer.svg?branch=master)](https://travis-ci.org/hmrc/business-customer) [ ![Download](https://api.bintray.com/packages/hmrc/releases/business-customer/images/download.svg) ](https://bintray.com/hmrc/releases/business-customer/_latestVersion)
+[![Build Status](https://travis-ci.org/hmrc/business-customer.svg)](https://travis-ci.org/hmrc/business-customer) [ ![Download](https://api.bintray.com/packages/hmrc/releases/business-customer/images/download.svg) ](https://bintray.com/hmrc/releases/business-customer/_latestVersion)
 
 
 This service privides the ability for uk-based or non-UK based agents, organisation or self-assessment individuals to create their Business Partner in ETMP. It also allows agents to add known-facts to enrol for a service in gateway.
