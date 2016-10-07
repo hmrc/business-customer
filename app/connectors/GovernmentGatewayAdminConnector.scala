@@ -41,19 +41,18 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
   def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier) = {
     val postUrl = s"$ggaBaseUrl/$serviceName/known-facts"
     val timerContext = metrics.startTimer(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-    http.POST[JsValue, HttpResponse](postUrl, knownFacts) map {
-      response =>
-        timerContext.stop()
-        auditAddKnownFacts(serviceName, knownFacts, response)
-        response.status match {
-          case OK =>
-            metrics.incrementSuccessCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-            response
-          case status =>
-            metrics.incrementFailedCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-            Logger.warn(s"[GovernmentGatewayAdminConnector][addKnownFacts] - status: $status Error ${response.body}")
-            response
-        }
+    http.POST[JsValue, HttpResponse](postUrl, knownFacts) map { response =>
+      timerContext.stop()
+      auditAddKnownFacts(serviceName, knownFacts, response)
+      response.status match {
+        case OK =>
+          metrics.incrementSuccessCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
+          response
+        case status =>
+          metrics.incrementFailedCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
+          Logger.warn(s"[GovernmentGatewayAdminConnector][addKnownFacts] - status: $status Error ${response.body}")
+          response
+      }
     }
   }
 

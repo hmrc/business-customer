@@ -30,15 +30,15 @@ trait AddKnownFactsController extends BaseController {
   def addKnownFacts(utr: String, serviceName: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
-      ggAdminConnector.addKnownFacts(serviceName, json).map {
-        addKnownFactResponse =>
-          addKnownFactResponse.status match {
-            case OK => Ok(addKnownFactResponse.body)
-            case _ =>
-              Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
-                s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
-              Ok(addKnownFactResponse.body)
-          }
+      Logger.info(s"[AddKnownFactsController][addKnownFacts] - requestJson = $json")
+      ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>
+        addKnownFactResponse.status match {
+          case OK => Ok(addKnownFactResponse.body)
+          case _ =>
+            Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
+              s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
+            Ok(addKnownFactResponse.body)
+        }
       }
   }
 

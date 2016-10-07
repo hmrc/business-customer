@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.{EtmpConnector, GovernmentGatewayAdminConnector}
+import connectors.EtmpConnector
 import play.api.Logger
 import play.api.mvc.Action
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -30,18 +30,17 @@ trait BusinessRegistrationController extends BaseController {
   def register(utr: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
-      desConnector.register(json).map {
-        registerData =>
-          Logger.info(
-            s"""[BusinessRegistrationController] [register] [registerData.status]
-                |= ${registerData.status} && [registerData.body] = ${registerData.body}""".stripMargin)
-          registerData.status match {
-            case OK => Ok(registerData.body)
-            case NOT_FOUND => NotFound(registerData.body)
-            case BAD_REQUEST => BadRequest(registerData.body)
-            case SERVICE_UNAVAILABLE => ServiceUnavailable(registerData.body)
-            case INTERNAL_SERVER_ERROR | _ => InternalServerError(registerData.body)
-          }
+      desConnector.register(json).map { registerResponse =>
+        Logger.info(
+          s"""[BusinessRegistrationController] [register] [payload] = $json \n [registerData.status]
+              |= ${registerResponse.status} && [registerData.body] = ${registerResponse.body}""".stripMargin)
+        registerResponse.status match {
+          case OK => Ok(registerResponse.body)
+          case NOT_FOUND => NotFound(registerResponse.body)
+          case BAD_REQUEST => BadRequest(registerResponse.body)
+          case SERVICE_UNAVAILABLE => ServiceUnavailable(registerResponse.body)
+          case INTERNAL_SERVER_ERROR | _ => InternalServerError(registerResponse.body)
+        }
       }
   }
 
