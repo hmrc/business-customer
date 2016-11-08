@@ -1,5 +1,8 @@
 # microservice specific routes
 
+## API 1b ##
+GET     /org/:utr/details/:identifier/:identifierType               controllers.DetailsController.getDetails(utr: String, identifier: String, identifierType: String)
+
 ## API 4 call and add known fact
 POST    /agent/:utr/business-customer/register                      controllers.AgentBusinessRegistrationController.register(utr: String)
 POST    /org/:utr/business-customer/register                        controllers.BusinessRegistrationController.register(utr: String)

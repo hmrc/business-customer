@@ -26,7 +26,7 @@ trait DetailsController extends BaseController {
 
   def etmpConnector: EtmpConnector
 
-  def getDetails(accountRef: String, identifier: String, identifierType: String) = Action.async { implicit request =>
+  def getDetails(utr: String, identifier: String, identifierType: String) = Action.async { implicit request =>
     etmpConnector.getDetails(identifier = identifier, identifierType = identifierType) map { responseReceived =>
       responseReceived.status match {
         case OK => Ok(responseReceived.body)

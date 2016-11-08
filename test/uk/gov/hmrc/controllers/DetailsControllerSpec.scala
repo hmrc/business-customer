@@ -26,6 +26,7 @@ import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.domain.SaUtrGenerator
 import uk.gov.hmrc.play.http.HttpResponse
 
 import scala.concurrent.Future
@@ -33,7 +34,8 @@ import scala.concurrent.Future
 class DetailsControllerSpec extends PlaySpec with OneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
 
   val mockEtmpConnector = mock[EtmpConnector]
-  val callingUtr = "ATED-123"
+
+  val utr = new SaUtrGenerator().nextSaUtr.toString
   val ARNMatch = "AARN1234567"
   val ARNNotMatch = "AARN8901234"
   val identifierType = "arn"
@@ -59,27 +61,27 @@ class DetailsControllerSpec extends PlaySpec with OneServerPerSuite with Mockito
     "getDetails" must {
       "respond with OK, for successful GET" in {
         when(mockEtmpConnector.getDetails(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(OK, Some(successResponseJson))))
-        val result = TestDetailsController.getDetails(callingUtr, ARNMatch, identifierType).apply(FakeRequest())
+        val result = TestDetailsController.getDetails(utr, ARNMatch, identifierType).apply(FakeRequest())
         status(result) must be(OK)
       }
       "respond with NOT_FOUND, for unsuccessful GET" in {
         when(mockEtmpConnector.getDetails(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(NOT_FOUND, Some(failureResponseJson))))
-        val result = TestDetailsController.getDetails(callingUtr, ARNMatch, identifierType).apply(FakeRequest())
+        val result = TestDetailsController.getDetails(utr, ARNMatch, identifierType).apply(FakeRequest())
         status(result) must be(NOT_FOUND)
       }
       "respond with BAD_REQUEST, if ETMP sends BadRequest status" in {
         when(mockEtmpConnector.getDetails(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(BAD_REQUEST, Some(errorResponseJson))))
-        val result = TestDetailsController.getDetails(callingUtr, ARNMatch, identifierType).apply(FakeRequest())
+        val result = TestDetailsController.getDetails(utr, ARNMatch, identifierType).apply(FakeRequest())
         status(result) must be(BAD_REQUEST)
       }
       "respond with SERVICE_UNAVAILABLE, if ETMP is unavailable" in {
         when(mockEtmpConnector.getDetails(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson))))
-        val result = TestDetailsController.getDetails(callingUtr, ARNMatch, identifierType).apply(FakeRequest())
+        val result = TestDetailsController.getDetails(utr, ARNMatch, identifierType).apply(FakeRequest())
         status(result) must be(SERVICE_UNAVAILABLE)
       }
       "respond with InternalServerError, if ETMP sends some server error response" in {
         when(mockEtmpConnector.getDetails(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson))))
-        val result = TestDetailsController.getDetails(callingUtr, ARNMatch, identifierType).apply(FakeRequest())
+        val result = TestDetailsController.getDetails(utr, ARNMatch, identifierType).apply(FakeRequest())
         status(result) must be(INTERNAL_SERVER_ERROR)
       }
     }
