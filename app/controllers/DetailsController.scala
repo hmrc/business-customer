@@ -40,8 +40,14 @@ trait DetailsController extends BaseController {
 
 }
 
-object DetailsController extends DetailsController {
-
+object BusinessDetailsController extends DetailsController {
   val etmpConnector: EtmpConnector = EtmpConnector
+}
 
+object SaDetailsController extends DetailsController {
+  val etmpConnector: EtmpConnector = EtmpConnector
+}
+
+object AgentDetailsController extends DetailsController {
+  val etmpConnector: EtmpConnector = EtmpConnector
 }

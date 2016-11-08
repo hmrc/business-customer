@@ -17,7 +17,7 @@
 package uk.gov.hmrc.controllers
 
 import connectors.EtmpConnector
-import controllers.DetailsController
+import controllers.{SaDetailsController, AgentDetailsController, BusinessDetailsController, DetailsController}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -54,7 +54,9 @@ class DetailsControllerSpec extends PlaySpec with OneServerPerSuite with Mockito
 
   "DetailsController" must {
     "use correct ETMP connector" in {
-      DetailsController.etmpConnector must be(EtmpConnector)
+      BusinessDetailsController.etmpConnector must be(EtmpConnector)
+      AgentDetailsController.etmpConnector must be(EtmpConnector)
+      SaDetailsController.etmpConnector must be(EtmpConnector)
     }
 
 
