@@ -130,6 +130,53 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
       val result = TestEtmpConnector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
     }
+
+    "getDetails" must {
+      "do a GET call and fetch data from ETMP for ARN that fails" in {
+        val successResponseJson = Json.parse( """{"sapNumber":"1234567890", "safeId": "EX0012345678909", "agentReferenceNumber": "AARN1234567"}""")
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+        when(mockWSHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, None)))
+        val result = TestEtmpConnector.getDetails(identifier = "AARN1234567", identifierType = "arn")
+        await(result).status must be(BAD_REQUEST)
+      }
+      "do a GET call and fetch data from ETMP for ARN" in {
+        val successResponseJson = Json.parse( """{"sapNumber":"1234567890", "safeId": "EX0012345678909", "agentReferenceNumber": "AARN1234567"}""")
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+        when(mockWSHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(HttpResponse(OK, Some(successResponseJson))))
+        val result = TestEtmpConnector.getDetails(identifier = "AARN1234567", identifierType = "arn")
+        await(result).json must be(successResponseJson)
+        await(result).status must be(OK)
+        verify(mockWSHttp, times(1)).GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())
+      }
+      "do a GET call and fetch data from ETMP for utr" in {
+        val successResponseJson = Json.parse( """{"sapNumber":"1234567890", "safeId": "EX0012345678909", "agentReferenceNumber": "AARN1234567"}""")
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+        when(mockWSHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(HttpResponse(OK, Some(successResponseJson))))
+        val result = TestEtmpConnector.getDetails(identifier = "1111111111", identifierType = "utr")
+        await(result).json must be(successResponseJson)
+        await(result).status must be(OK)
+        verify(mockWSHttp, times(1)).GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())
+      }
+      "do a GET call and fetch data from ETMP for safeid" in {
+        val successResponseJson = Json.parse( """{"sapNumber":"1234567890", "safeId": "XP1200000100003", "agentReferenceNumber": "AARN1234567"}""")
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+        when(mockWSHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(HttpResponse(OK, Some(successResponseJson))))
+        val result = TestEtmpConnector.getDetails(identifier = "XP1200000100003", identifierType = "safeid")
+        await(result).json must be(successResponseJson)
+        await(result).status must be(OK)
+        verify(mockWSHttp, times(1)).GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())
+      }
+      "throw runtime exception for other identifier type" in {
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+        val thrown = the[RuntimeException] thrownBy TestEtmpConnector.getDetails(identifier = "AARN1234567", identifierType = "xyz")
+        thrown.getMessage must include("unexpected identifier type supplied")
+        verify(mockWSHttp, times(0)).GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())
+      }
+    }
   }
 
 }

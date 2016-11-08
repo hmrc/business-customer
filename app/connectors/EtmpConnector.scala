@@ -62,6 +62,33 @@ trait EtmpConnector extends ServicesConfig with Auditable {
     }
   }
 
+  def getDetails(identifier: String, identifierType: String): Future[HttpResponse] = {
+    def getDetailsFromEtmp(getUrl: String): Future[HttpResponse] = {
+      implicit val hc = createHeaderCarrier
+      Logger.debug(s"[EtmpDetailsConnector][getDetailsFromEtmp] - GET $getUrl")
+      val timerContext = metrics.startTimer(MetricsEnum.ETMP_GET_DETAILS)
+      http.GET[HttpResponse](getUrl).map { response =>
+        timerContext.stop()
+        response.status match {
+          case OK => metrics.incrementSuccessCounter(MetricsEnum.ETMP_GET_DETAILS)
+          case status =>
+            metrics.incrementFailedCounter(MetricsEnum.ETMP_GET_DETAILS)
+            Logger.warn(s"[EtmpDetailsConnector][getDetailsFromEtmp] - status: $status Error ${response.body}")
+        }
+        response
+      }
+    }
+
+    identifierType match {
+      case "arn" => getDetailsFromEtmp(s"$serviceUrl/registration/details?arn=$identifier")
+      case "safeid" => getDetailsFromEtmp(s"$serviceUrl/registration/details?safeid=$identifier")
+      case "utr" => getDetailsFromEtmp(s"$serviceUrl/registration/details?utr=$identifier")
+      case unknownIdentifier =>
+        Logger.warn(s"[EtmpDetailsConnector][getDetails] - unexpected identifier type supplied of $unknownIdentifier")
+        throw new RuntimeException(s"[EtmpDetailsConnector][getDetails] - unexpected identifier type supplied of $unknownIdentifier")
+    }
+  }
+
   private def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
     val eventType = response.status match {
       case OK => EventTypes.Succeeded

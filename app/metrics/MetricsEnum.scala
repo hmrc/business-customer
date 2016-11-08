@@ -21,5 +21,6 @@ object MetricsEnum extends Enumeration {
   type MetricsEnum = Value
   val GG_ADMIN_ADD_KNOWN_FACTS = Value
   val ETMP_REGISTER_BUSINESS_PARTNER = Value
+  val ETMP_GET_DETAILS = Value
 
 }
