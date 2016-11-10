@@ -1,9 +1,9 @@
 # microservice specific routes
 
-## API 1b ##
-GET     /agent/:utr/business-customer/details/:identifier/:identifierType  controllers.AgentDetailsController.getDetails(utr: String, identifier: String, identifierType: String)
-GET     /org/:utr/business-customer/details/:identifier/:identifierType    controllers.BusinessDetailsController.getDetails(utr: String, identifier: String, identifierType: String)
-GET     /sa/:utr/business-customer/details/:identifier/:identifierType     controllers.SaDetailsController.getDetails(utr: String, identifier: String, identifierType: String)
+## API 3 Update Registration Date ##
+POST    /agent/:utr/business-customer/update/:safeId                controllers.AgentUpdateBusinessRegistrationController.update(utr: String, safeId: String)
+POST    /org/:utr/business-customer/update/:safeId                  controllers.UpdateBusinessRegistrationController.update(utr: String, safeId: String)
+POST    /sa/:utr/business-customer/update/:safeId                   controllers.SaUpdateBusinessRegistrationController.update(utr: String, safeId: String)
 
 ## API 4 call and add known fact
 POST    /agent/:utr/business-customer/register                      controllers.AgentBusinessRegistrationController.register(utr: String)
