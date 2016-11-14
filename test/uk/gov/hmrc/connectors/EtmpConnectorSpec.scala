@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.http.logging.SessionId
-import uk.gov.hmrc.play.http.ws.{WSGet, WSPost}
+import uk.gov.hmrc.play.http.ws.{WSPut, WSGet, WSPost}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
 
 import scala.concurrent.Future
@@ -44,7 +44,7 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
     override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
   }
 
-  class MockHttp extends WSGet with WSPost {
+  class MockHttp extends WSGet with WSPost with WSPut {
     override val hooks = NoneRequired
   }
 
@@ -53,7 +53,8 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
   object TestEtmpConnector extends EtmpConnector {
     override val serviceUrl = ""
     override val registerUri = "/registration/organisation"
-    override val http: HttpGet with HttpPost = mockWSHttp
+    override val updateRegistrationDetailsUri = "/registration/safeid"
+    override val http: HttpGet with HttpPost with WSPut = mockWSHttp
     override val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
     override val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
 
@@ -129,6 +130,48 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
       }
       val result = TestEtmpConnector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
+    }
+
+    "update registration details" must {
+      val inputJsonForNUK = Json.parse(
+        """
+          |{
+          |  "businessName": "ACME",
+          |  "businessAddress": {
+          |    "line_1": "111",
+          |    "line_2": "ABC Street",
+          |    "line_3": "ABC city",
+          |    "line_4": "ABC 123",
+          |    "country": "ABC"
+          |  }
+          |}
+        """.stripMargin)
+
+
+      "Correctly submit data if with a valid response" in {
+        val successResponse = Json.parse( """{"processingDate": "2001-12-17T09:30:47Z"}""")
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+
+        when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(HttpResponse(OK, Some(successResponse))))
+
+        val result = TestEtmpConnector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
+        val response = await(result)
+        response.status must be(OK)
+        response.json must be(successResponse)
+      }
+
+      "submit data  with an invalid response" in {
+        val notFoundResponse = Json.parse( """{}""")
+        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+
+        when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(HttpResponse(NOT_FOUND, Some(notFoundResponse))))
+
+        val result = TestEtmpConnector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
+        val response = await(result)
+        response.status must be(NOT_FOUND)
+      }
     }
   }
 
