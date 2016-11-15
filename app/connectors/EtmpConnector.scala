@@ -77,7 +77,7 @@ trait EtmpConnector extends ServicesConfig with Auditable {
     }
   }
 
-  def updateRegistrationDetails(safeId: String, updatedData: JsValue): Future[HttpResponse] = {
+  def updateRegistrationDetails(safeId: String, updatedData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     def auditUpdateRegistrationDetails(safeId: String,
                                                updateData: JsValue,
                                                response: HttpResponse)(implicit hc: HeaderCarrier) {
@@ -95,7 +95,7 @@ trait EtmpConnector extends ServicesConfig with Auditable {
         eventType = eventType)
     }
 
-    implicit val headerCarrier = createHeaderCarrier
+    implicit val hc = createHeaderCarrier
     val putUrl = s"""$serviceUrl$updateRegistrationDetailsUri/$safeId"""
     Logger.debug( s"""[EtmpDetailsConnector][updateRegistrationDetails] - PUTurl = $putUrl & payload = ${Json.toJson(updatedData)}""")
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
