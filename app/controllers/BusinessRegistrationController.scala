@@ -31,9 +31,6 @@ trait BusinessRegistrationController extends BaseController {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.register(json).map { registerResponse =>
-        Logger.info(
-          s"""[BusinessRegistrationController] [register] [payload] = $json \n [registerData.status]
-              |= ${registerResponse.status} && [registerData.body] = ${registerResponse.body}""".stripMargin)
         registerResponse.status match {
           case OK => Ok(registerResponse.body)
           case NOT_FOUND => NotFound(registerResponse.body)
