@@ -31,9 +31,6 @@ trait UpdateBusinessRegistrationController extends BaseController {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.updateRegistrationDetails(safeId, json).map { updateResponse =>
-        Logger.info(
-          s"""[UpdateBusinessRegistrationController] [update] [payload] = $json \n [updateResponse.status]
-              |= ${updateResponse.status} && [updateResponse.body] = ${updateResponse.body}""".stripMargin)
         updateResponse.status match {
           case OK => Ok(updateResponse.body)
           case NOT_FOUND => NotFound(updateResponse.body)

@@ -48,7 +48,7 @@ trait EtmpConnector extends ServicesConfig with Auditable {
 
   def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
-      val eventType = response.status match {
+      val status = response.status match {
         case OK => EventTypes.Succeeded
         case _ => EventTypes.Failed
       }
@@ -56,8 +56,9 @@ trait EtmpConnector extends ServicesConfig with Auditable {
         detail = Map("txName" -> "etmpRegister",
           "registerData" -> s"$registerData",
           "responseStatus" -> s"${response.status}",
-          "responseBody" -> s"${response.body}"),
-        eventType = eventType)
+          "responseBody" -> s"${response.body}",
+          "status" -> s"$status"
+        ))
     }
 
     implicit val hc = createHeaderCarrier
@@ -81,8 +82,7 @@ trait EtmpConnector extends ServicesConfig with Auditable {
     def auditUpdateRegistrationDetails(safeId: String,
                                                updateData: JsValue,
                                                response: HttpResponse)(implicit hc: HeaderCarrier) {
-      Logger.debug(s"[EtmpDetailsConnector][auditUpdateRegistrationDetails] - RESPONSE status ${response.status}, body ${response.body}")
-      val eventType = response.status match {
+      val status = response.status match {
         case OK => EventTypes.Succeeded
         case _ => EventTypes.Failed
       }
@@ -91,13 +91,12 @@ trait EtmpConnector extends ServicesConfig with Auditable {
           "safeId" -> s"$safeId",
           "requestData" -> s"${Json.toJson(updateData)}",
           "responseStatus" -> s"${response.status}",
-          "responseBody" -> s"${response.body}"),
-        eventType = eventType)
+          "responseBody" -> s"${response.body}",
+          "status" -> s"$status"))
     }
 
     implicit val hc = createHeaderCarrier
     val putUrl = s"""$serviceUrl$updateRegistrationDetailsUri/$safeId"""
-    Logger.debug( s"""[EtmpDetailsConnector][updateRegistrationDetails] - PUTurl = $putUrl & payload = ${Json.toJson(updatedData)}""")
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
     http.PUT(putUrl, updatedData).map { response =>
       timerContext.stop()

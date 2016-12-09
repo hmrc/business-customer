@@ -30,7 +30,6 @@ trait AddKnownFactsController extends BaseController {
   def addKnownFacts(utr: String, serviceName: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
-      Logger.info(s"[AddKnownFactsController][addKnownFacts] - requestJson = $json")
       ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>
         addKnownFactResponse.status match {
           case OK => Ok(addKnownFactResponse.body)
