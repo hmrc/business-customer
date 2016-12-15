@@ -20,6 +20,7 @@ import com.codahale.metrics.Timer
 import com.codahale.metrics.Timer.Context
 import com.kenshoo.play.metrics.MetricsRegistry
 import metrics.MetricsEnum.MetricsEnum
+import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
 trait Metrics {
 
@@ -31,24 +32,24 @@ trait Metrics {
 
 }
 
-object Metrics extends Metrics {
-
+object Metrics extends Metrics with MicroserviceMetrics{
+  val registry = metrics.defaultRegistry
   val timers = Map(
-    MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> MetricsRegistry.defaultRegistry.timer("gga-add-known-facts-agent-response-timer"),
-    MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> MetricsRegistry.defaultRegistry.timer("etmp-create-business-partner-response-timer"),
-    MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> MetricsRegistry.defaultRegistry.timer("etmp-update-registration-details-response-timer")
+    MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.timer("gga-add-known-facts-agent-response-timer"),
+    MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> registry.timer("etmp-create-business-partner-response-timer"),
+    MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> registry.timer("etmp-update-registration-details-response-timer")
   )
 
   val successCounters = Map(
-    MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> MetricsRegistry.defaultRegistry.counter("gga-add-known-facts-agent-success-counter"),
-    MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> MetricsRegistry.defaultRegistry.counter("etmp-create-business-partner-success-counter"),
-    MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> MetricsRegistry.defaultRegistry.counter("etmp-update-registration-details-success-counter")
+    MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.counter("gga-add-known-facts-agent-success-counter"),
+    MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> registry.counter("etmp-create-business-partner-success-counter"),
+    MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> registry.counter("etmp-update-registration-details-success-counter")
   )
 
   val failedCounters = Map(
-    MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> MetricsRegistry.defaultRegistry.counter("gga-add-known-facts-agent-failed-counter"),
-    MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> MetricsRegistry.defaultRegistry.counter("etmp-create-business-partner-failed-counter"),
-    MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> MetricsRegistry.defaultRegistry.counter("etmp-update-registration-details-failed-counter")
+    MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.counter("gga-add-known-facts-agent-failed-counter"),
+    MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> registry.counter("etmp-create-business-partner-failed-counter"),
+    MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> registry.counter("etmp-update-registration-details-failed-counter")
   )
 
   override def startTimer(api: MetricsEnum): Context = timers(api).time()
