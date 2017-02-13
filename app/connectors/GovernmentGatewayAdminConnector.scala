@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,8 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
           response
         case status =>
           metrics.incrementFailedCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-          Logger.warn(s"[GovernmentGatewayAdminConnector][addKnownFacts] - status: $status Error ${response.body}")
+          Logger.warn(s"[GovernmentGatewayAdminConnector][addKnownFacts] - status: $status")
+          doFailedAudit("addKnownFacts", knownFacts.toString, response.body)
           response
       }
     }
