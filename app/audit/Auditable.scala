@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,16 @@ trait Auditable {
   def sendDataEvent(transactionName: String,
                     path: String = "N/A",
                     tags: Map[String, String] = Map.empty[String, String],
-                    detail: Map[String, String])(implicit hc: HeaderCarrier): Unit =
+                    detail: Map[String, String])(implicit hc: HeaderCarrier): Unit = {
     audit.sendDataEvent(DataEvent(appName, auditType = transactionName,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)))
+  }
 
+  def doFailedAudit(auditType: String, request: String, response: String)(implicit hc:HeaderCarrier): Unit = {
+    val auditDetails = Map("request" -> request,
+      "response" -> response)
+
+    sendDataEvent(auditType, detail = auditDetails)
+  }
 }

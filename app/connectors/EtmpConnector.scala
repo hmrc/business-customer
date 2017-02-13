@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ trait EtmpConnector extends ServicesConfig with Auditable {
           response
         case status =>
           metrics.incrementFailedCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-          Logger.warn(s"[ETMPConnector][register] - status: $status Error: ${response.body}")
+          Logger.warn(s"[ETMPConnector][register] - status: $status")
+          doFailedAudit("registerFailed", registerData.toString, response.body)
           response
       }
     }
@@ -107,7 +108,8 @@ trait EtmpConnector extends ServicesConfig with Auditable {
           response
         case status =>
           metrics.incrementFailedCounter(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
-          Logger.warn(s"[EtmpDetailsConnector][updateRegistrationDetails] - status: $status Error ${response.body}")
+          Logger.warn(s"[EtmpDetailsConnector][updateRegistrationDetails] - status: $status")
+          doFailedAudit("updateRegistrationDetailsFailed", updatedData.toString, response.body)
           response
       }
     }
