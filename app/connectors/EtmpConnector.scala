@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait EtmpConnector extends ServicesConfig with Auditable {
+trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads {
 
   def serviceUrl: String
 
