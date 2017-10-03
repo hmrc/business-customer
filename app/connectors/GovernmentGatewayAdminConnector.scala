@@ -22,9 +22,9 @@ import metrics.{Metrics, MetricsEnum}
 import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.http.{HeaderCarrier, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -36,7 +36,7 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
 
   def metrics: Metrics
 
-  def http: HttpGet with HttpPost
+  def http: CorePost
 
   def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier) = {
     val postUrl = s"$ggaBaseUrl/$serviceName/known-facts"

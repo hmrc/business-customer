@@ -21,11 +21,11 @@ import config.{MicroserviceAuditConnector, WSHttp}
 import metrics.{Metrics, MetricsEnum}
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.http.logging.Authorization
-import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,7 +44,7 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
 
   def metrics: Metrics
 
-  def http: HttpGet with HttpPost with HttpPut
+  def http: CorePut with CorePost
 
   def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
