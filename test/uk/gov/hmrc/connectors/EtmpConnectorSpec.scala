@@ -28,13 +28,12 @@ import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.audit.TestAudit
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.config.{AppName, RunMode}
-import uk.gov.hmrc.play.http.logging.SessionId
-import uk.gov.hmrc.play.http.ws.{WSPut, WSGet, WSPost}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
+import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
 import scala.concurrent.Future
 
@@ -44,17 +43,14 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
     override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
   }
 
-  class MockHttp extends WSGet with WSPost with WSPut {
-    override val hooks = NoneRequired
-  }
-
-  val mockWSHttp = mock[MockHttp]
+  trait MockedVerbs extends CorePut with CorePost
+  val mockWSHttp: CorePut with CorePost = mock[MockedVerbs]
 
   object TestEtmpConnector extends EtmpConnector {
     override val serviceUrl = ""
     override val registerUri = "/registration/organisation"
     override val updateRegistrationDetailsUri = "/registration/safeid"
-    override val http: HttpGet with HttpPost with WSPut = mockWSHttp
+    override val http: CorePost with CorePut = mockWSHttp
     override val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
     override val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
 
@@ -102,7 +98,7 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
         """.stripMargin)
 
       implicit val hc = HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
-      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn {
+      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())) thenReturn {
         Future.successful(HttpResponse(OK, responseJson = Some(successResponse)))
       }
       val result = TestEtmpConnector.register(inputJsonForNUK)
@@ -125,7 +121,7 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
         """.stripMargin)
 
       implicit val hc = HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
-      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn {
+      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())) thenReturn {
         Future.successful(HttpResponse(BAD_REQUEST, responseJson = Some(successResponse)))
       }
       val result = TestEtmpConnector.register(inputJsonForNUK)
@@ -152,7 +148,7 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
         val successResponse = Json.parse( """{"processingDate": "2001-12-17T09:30:47Z"}""")
         implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
 
-        when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+        when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
           .thenReturn(Future.successful(HttpResponse(OK, Some(successResponse))))
 
         val result = TestEtmpConnector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
@@ -165,7 +161,7 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
         val notFoundResponse = Json.parse( """{}""")
         implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
 
-        when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+        when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
           .thenReturn(Future.successful(HttpResponse(NOT_FOUND, Some(notFoundResponse))))
 
         val result = TestEtmpConnector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)

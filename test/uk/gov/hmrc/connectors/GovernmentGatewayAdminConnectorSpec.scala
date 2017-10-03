@@ -28,15 +28,15 @@ import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.audit.TestAudit
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.config.{AppName, RunMode}
-import uk.gov.hmrc.play.http.logging.SessionId
 import uk.gov.hmrc.play.http.ws.{WSGet, WSPost}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
 class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
 
@@ -44,16 +44,13 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
     override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
   }
 
-  class MockHttp extends WSGet with WSPost {
-    override val hooks = NoneRequired
-  }
-
-  val mockWSHttp = mock[MockHttp]
+  trait MockedVerbs extends CorePost
+  val mockWSHttp: CorePost = mock[MockedVerbs]
 
   object TestGGAdminConnector extends GovernmentGatewayAdminConnector {
     override val serviceUrl = ""
     override val ggaBaseUrl = ""
-    override val http: HttpGet with HttpPost = mockWSHttp
+    override val http: CorePost = mockWSHttp
     override val audit: Audit = new TestAudit
     override val appName: String = "Test"
     override def metrics = Metrics
@@ -74,7 +71,7 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
 
     "for successful set of known facts, return response" in {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
-      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).
+      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).
         thenReturn(Future.successful(HttpResponse(OK, responseJson = Some(successfulJson))))
 
       val knownFacts = Json.toJson("")
@@ -84,7 +81,7 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
 
     "for unsuccessful call of known facts, return response" in {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
-      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).
+      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).
         thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(failureJson))))
 
       val knownFacts = Json.toJson("")
