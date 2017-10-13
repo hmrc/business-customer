@@ -5,14 +5,18 @@ Business customer microservice
 [![Build Status](https://travis-ci.org/hmrc/business-customer.svg)](https://travis-ci.org/hmrc/business-customer) [ ![Download](https://api.bintray.com/packages/hmrc/releases/business-customer/images/download.svg) ](https://bintray.com/hmrc/releases/business-customer/_latestVersion)
 
 
-This service privides the ability for uk-based or non-UK based agents, organisation or self-assessment individuals to create their Business Partner in ETMP. It also allows agents to add known-facts to enrol for a service in gateway.
+This service privides the ability for UK-based or Non-UK based agents, organisation or self-assessment individuals to create their Business Partner Record in ETMP (HOD). 
+It also allows agents to add known-facts to enrol for a service in gateway.
 
 ### Create Business Partner
 
 The request must be a valid json using one of the following uris
-- POST    /sa/:utr/business-customer/register: Self Assessment users should call this
-- POST    /org/:utr/business-customer/register: Organisations should call this
-- POST    /agent/:utr/business-customer/register: Agents should call this
+
+| PATH | Supported Methods | Description |
+|------|-------------------|-------------|
+|```/sa/:utr/business-customer/register``` | POST | registers a SA user|
+|```/org/:utr/business-customer/register``` | POST | registers an Org user |
+|```/agent/:utr/business-customer/register``` | POST | registers an agent |
 
 Where:
 
@@ -114,6 +118,11 @@ Where:
 ### Add Known Facts
 
 The request must be a valid json using one of the following uris
+
+| PATH | Supported Methods | Description |
+|------|-------------------|-------------|
+|```/agent/:utr/business-customer/:serviceName/known-facts``` | POST | agents adds known-facts |
+
 - POST    /agent/:utr/business-customer/:serviceName/known-facts: Agents should call this
 
 Where:
