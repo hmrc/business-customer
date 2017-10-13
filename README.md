@@ -7,7 +7,7 @@ Business customer microservice
 
 This service privides the ability for uk-based or non-UK based agents, organisation or self-assessment individuals to create their Business Partner in ETMP. It also allows agents to add known-facts to enrol for a service in gateway.
 
-###Create Business Partner
+### Create Business Partner
 
 The request must be a valid json using one of the following uris
 - POST    /sa/:utr/business-customer/register: Self Assessment users should call this
@@ -20,7 +20,7 @@ Where:
 |:--------:|------------------------------|
 |   utr    | The Unique Tax Reference or Agent-Code or Org-Id |
 
-####Example of usage for individual or Agent
+#### Example of usage for individual or Agent
 
  POST /agent/123456789/business-customer/register
  POST /sa/123456789/business-customer/register
@@ -67,7 +67,7 @@ Where:
 }
  ```
 
-####Example of usage for organisation
+#### Example of usage for organisation
 
  POST /org/123456789/business-customer/register
 
@@ -111,7 +111,7 @@ Where:
 }
  ```
 
-###Add Known Facts
+### Add Known Facts
 
 The request must be a valid json using one of the following uris
 - POST    /agent/:utr/business-customer/:serviceName/known-facts: Agents should call this
