@@ -5,10 +5,10 @@ Business customer microservice
 [![Build Status](https://travis-ci.org/hmrc/business-customer.svg)](https://travis-ci.org/hmrc/business-customer) [ ![Download](https://api.bintray.com/packages/hmrc/releases/business-customer/images/download.svg) ](https://bintray.com/hmrc/releases/business-customer/_latestVersion)
 
 
-This service privides the ability for UK-based or Non-UK based agents, organisation or self-assessment individuals to create their Business Partner Record in ETMP (HOD). 
+This service provides the ability for Non-UK based agents, organisation or self-assessment individuals to create their Business Partner Record in ETMP (HOD). 
 It also allows agents to add known-facts to enrol for a service in gateway.
 
-### Create Business Partner
+### Register Non-UK clients and agents
 
 The request must be a valid json using one of the following uris
 
@@ -20,8 +20,8 @@ The request must be a valid json using one of the following uris
 
 Where:
 
-| Parameter | Message                      |
-|:--------:|------------------------------|
+| Parameter | Message |
+|--------|------------------------------|
 |   utr    | The Unique Tax Reference or Agent-Code or Org-Id |
 
 #### Example of usage for individual or Agent
@@ -114,6 +114,122 @@ Where:
   "safeId": "XE0001234567890"
 }
  ```
+### Update Registration for all clients and agents
+
+The request must be a valid json using one of the following uris
+
+| PATH | Supported Methods | Description |
+|------|-------------------|-------------|
+|```/sa/:utr/business-customer/update/:safeId ``` | POST | registers a SA user|
+|```/org/:utr/business-customer/update/:safeId ``` | POST | registers an Org user |
+|```/agent/:utr/business-customer/update/:safeId ``` | POST | registers an agent |
+
+Where:
+
+| Parameter | Message |
+|--------|------------|
+|   utr    | The Unique Tax Reference or Agent-Code or Org-Id |
+|   safeId    | ID generated when registered in ETMP - Register Once in ROSM (Register Once Subscribe Many) structure |
+
+#### Example of usage for individual or Agent
+
+ POST /agent/123456789/business-customer/update/XE0001234567890
+ POST /sa/123456789/business-customer/update/XE0001234567890
+
+ **Request body**
+
+ ```json
+{
+	"acknowledgementReference": "12345678901234567890123456789012",
+	"isAnAgent": false,
+	"isAGroup": false,
+	"identification": {
+		"idNumber": "123456",
+		"issuingInstitution": "France Institution",
+		"issuingCountryCode": "FR"
+	},
+	"individual": {
+		"firstName": "John",
+		"lastName": "Smith",
+		"dateOfBirth": "1990-04-03"
+	},
+	"address": {
+		"addressLine1": "100, Sutton Street",
+		"addressLine2": "Wokingham",
+		"addressLine3": "Surrey",
+		"addressLine4": "London",
+		"postalCode": "DH1 4EJ",
+		"countryCode": "GB"
+	},
+	"contactDetails": {
+		"phoneNumber": "01332752856",
+		"mobileNumber": "07782565326",
+		"faxNumber": "01332754256"
+	}
+}
+ ```
+ 
+```text
+isAnAgent = true, for an agent
+``` 
+ 
+ **Response body**
+
+ ```json
+{
+	"processingDate": "2001-12-17T09:30:47Z",
+	"sapNumber": "1234567890",
+	"safeId": "XE0001234567890"
+}
+ ```
+
+#### Example of usage for organisation
+
+ POST /org/123456789/business-customer/update/XE0001234567890
+
+ **Request body**
+
+ ```json
+{
+	"acknowledgementReference": "12345678901234567890123456789012",
+	"isAnAgent": false,
+	"isAGroup": false,
+	"identification": {
+		"idNumber": "123456",
+		"issuingInstitution": "France Institution",
+		"issuingCountryCode": "FR"
+	},
+	"organisation": {
+		"organisationName": "John"
+	},
+	"address": {
+		"addressLine1": "100, Sutton Street",
+		"addressLine2": "Wokingham",
+		"addressLine3": "Surrey",
+		"addressLine4": "London",
+		"postalCode": "DH1 4EJ",
+		"countryCode": "GB"
+	},
+	"contactDetails": {
+		"phoneNumber": "01332752856",
+		"mobileNumber": "07782565326",
+		"faxNumber": "01332754256"
+	}
+}
+ ```
+ **Response body**
+
+ ```json
+{
+  "processingDate":"2001-12-17T09:30:47Z",
+  "sapNumber": "1234567890",
+  "safeId": "XE0001234567890"
+}
+ ```
+
+
+###================================
+
 
 ### Add Known Facts
 
@@ -123,16 +239,16 @@ The request must be a valid json using one of the following uris
 |------|-------------------|-------------|
 |```/agent/:utr/business-customer/:serviceName/known-facts``` | POST | agents adds known-facts |
 
-- POST    /agent/:utr/business-customer/:serviceName/known-facts: Agents should call this
+ POST  /agent/:utr/business-customer/:serviceName/known-facts: Agents should call this
 
 Where:
 
-| Parameter | Message                      |
-|:--------:|------------------------------|
+| Parameter | Message |
+|--------|------------|
 |   utr    | The unique reference of user, for agents Agent-Code |
 |   serviceName    | name of service against which person has to enrol |
 
-####Example of usage
+#### Example of usage
 
  POST /agent/123456789/business-customer/ATED/known-facts
 
