@@ -1,11 +1,11 @@
 # microservice specific routes
 
-## API 3 Update Registration Date ##
+## update registration for clients and agents
 POST    /agent/:utr/business-customer/update/:safeId                controllers.AgentUpdateBusinessRegistrationController.update(utr: String, safeId: String)
 POST    /org/:utr/business-customer/update/:safeId                  controllers.UpdateBusinessRegistrationController.update(utr: String, safeId: String)
 POST    /sa/:utr/business-customer/update/:safeId                   controllers.SaUpdateBusinessRegistrationController.update(utr: String, safeId: String)
 
-## API 4 call and add known fact
+## register Non-UK clients and agents
 POST    /agent/:utr/business-customer/register                      controllers.AgentBusinessRegistrationController.register(utr: String)
 POST    /org/:utr/business-customer/register                        controllers.BusinessRegistrationController.register(utr: String)
 POST    /sa/:utr/business-customer/register                         controllers.SaBusinessRegistrationController.register(utr: String)
