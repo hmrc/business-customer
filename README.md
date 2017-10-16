@@ -1,5 +1,5 @@
 business-customer
-=============
+================
 Business customer microservice
 
 [![Build Status](https://travis-ci.org/hmrc/business-customer.svg)](https://travis-ci.org/hmrc/business-customer) [ ![Download](https://api.bintray.com/packages/hmrc/releases/business-customer/images/download.svg) ](https://bintray.com/hmrc/releases/business-customer/_latestVersion)
@@ -226,10 +226,6 @@ isAnAgent = true, for an agent
   "safeId": "XE0001234567890"
 }
  ```
-
-
-###================================
-
 
 ### Add Known Facts
 
