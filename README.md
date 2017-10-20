@@ -18,7 +18,7 @@ The request must be a valid json using one of the following uris
 |```/org/:org/business-customer/register``` | POST | registers an Org user |
 |```/agent/:ac/business-customer/register``` | POST | registers an agent |
 
-Where:
+where,
 
 | Parameter | Message |
 |--------|------------------------------|
@@ -136,7 +136,7 @@ The request must be a valid json using one of the following uris
 |```/org/:org/business-customer/update/:safeId ``` | POST | registers an Org user |
 |```/agent/:ac/business-customer/update/:safeId ``` | POST | registers an agent |
 
-Where:
+where,
 
 | Parameter | Message |
 |--------|------------------------------|
@@ -258,7 +258,7 @@ The request must be a valid json using one of the following uris
 |------|-------------------|-------------|
 |```/agent/:ac/business-customer/:serviceName/known-facts``` | POST | agents adds known-facts |
 
-Where:
+where,
 
 | Parameter | Message |
 |--------|------------------------------|
