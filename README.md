@@ -273,7 +273,7 @@ Response status codes:
 
 #### Example of usage
 
- POST /agent/123456789/business-customer/ATED/known-facts
+ ```POST /agent/123456789/business-customer/ATED/known-facts```
 
  **Request body**
 
