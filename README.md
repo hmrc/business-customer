@@ -141,7 +141,7 @@ Where:
 | Parameter | Message |
 |--------|------------------------------|
 |   sa/org/ac    | unique auth id for clients/agents |
-|   safeId    | ID generated when registered in ETMP - Register Once in ROSM (Register Once Subscribe Many) structure |
+|   safeId    | ID generated when registered in ETMP - Register Once in ROSM (Register Once Subscribe Many) pattern |
 
 Response status codes:
 
