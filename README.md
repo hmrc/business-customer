@@ -38,7 +38,8 @@ Response status codes:
 #### Example of usage for individual or Agent
 
  ```POST /agent/123456789/business-customer/register```
- ```POST /sa/123456789/business-customer/register```
+  
+  ```POST /sa/123456789/business-customer/register```
 
  **Request body**
 
@@ -155,7 +156,7 @@ Response status codes:
 #### Example of usage for individual or Agent
 
  ```POST /agent/123456789/business-customer/update/XE0001234567890```
- ```POST /sa/123456789/business-customer/update/XE0001234567890```
+  ```POST /sa/123456789/business-customer/update/XE0001234567890```
 
  **Request body**
 
@@ -206,12 +207,12 @@ isAnAgent = true, for an agent
 
 #### Example of usage for organisation
 
- POST /org/123456789/business-customer/update/XE0001234567890
+ ```POST /org/123456789/business-customer/update/XE0001234567890```
 
  **Request body**
 
  ```json
-{
+{ull/15
 	"acknowledgementReference": "12345678901234567890123456789012",
 	"isAnAgent": false,
 	"isAGroup": false,
@@ -255,8 +256,6 @@ The request must be a valid json using one of the following uris
 | PATH | Supported Methods | Description |
 |------|-------------------|-------------|
 |```/agent/:ac/business-customer/:serviceName/known-facts``` | POST | agents adds known-facts |
-
- POST  /agent/:ac/business-customer/:serviceName/known-facts: Agents should call this
 
 Where:
 
