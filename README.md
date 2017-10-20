@@ -156,6 +156,7 @@ Response status codes:
 #### Example of usage for individual or Agent
 
  ```POST /agent/123456789/business-customer/update/XE0001234567890```
+ 
   ```POST /sa/123456789/business-customer/update/XE0001234567890```
 
  **Request body**
@@ -212,7 +213,7 @@ isAnAgent = true, for an agent
  **Request body**
 
  ```json
-{ull/15
+{
 	"acknowledgementReference": "12345678901234567890123456789012",
 	"isAnAgent": false,
 	"isAGroup": false,
