@@ -22,7 +22,18 @@ Where:
 
 | Parameter | Message |
 |--------|------------------------------|
-|   sa/org/ac    | Government Gateway Id for the user|
+|   sa/org/ac   | unique auth identifier for clients/agents |
+
+Response status codes:
+
+| Status | Message     |
+|-------|-------------|
+| 200   | Ok          |
+| 400   | Bad Request |
+| 404   | Not Found   |
+| 500   | Internal Server Error |
+| 503   | Service Unavailable |
+
 
 #### Example of usage for individual or Agent
 
@@ -126,11 +137,20 @@ The request must be a valid json using one of the following uris
 
 Where:
 
-
 | Parameter | Message |
 |--------|------------------------------|
-|   sa/org/ac    | Government Gateway Id for the user|
+|   sa/org/ac    | unique auth id for clients/agents |
 |   safeId    | ID generated when registered in ETMP - Register Once in ROSM (Register Once Subscribe Many) structure |
+
+Response status codes:
+
+| Status | Message     |
+|-------|-------------|
+| 200   | Ok          |
+| 400   | Bad Request |
+| 404   | Not Found   |
+| 500   | Internal Server Error |
+| 503   | Service Unavailable |
 
 #### Example of usage for individual or Agent
 
@@ -240,11 +260,16 @@ The request must be a valid json using one of the following uris
 
 Where:
 
-
 | Parameter | Message |
 |--------|------------------------------|
-|   ac    | Government Gateway Id for the agent|
-|   serviceName    | name of service against which person has to enrol |
+|   ac    | unique auth identifier for agents|
+|   serviceName    | name of service for which agent has to enrol |
+
+Response status codes:
+
+| Status | Message     |
+|-------|-------------|
+| 200   | Ok          |
 
 #### Example of usage
 
