@@ -27,7 +27,7 @@ trait BusinessRegistrationController extends BaseController {
 
   def desConnector: EtmpConnector
 
-  def register(utr: String) = Action.async {
+  def register(id: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.register(json).map { registerResponse =>

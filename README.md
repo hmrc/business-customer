@@ -14,15 +14,26 @@ The request must be a valid json using one of the following uris
 
 | PATH | Supported Methods | Description |
 |------|-------------------|-------------|
-|```/sa/:utr/business-customer/register``` | POST | registers a SA user|
-|```/org/:utr/business-customer/register``` | POST | registers an Org user |
-|```/agent/:utr/business-customer/register``` | POST | registers an agent |
+|```/sa/:sa/business-customer/register``` | POST | registers a SA user|
+|```/org/:org/business-customer/register``` | POST | registers an Org user |
+|```/agent/:ac/business-customer/register``` | POST | registers an agent |
 
 Where:
 
 | Parameter | Message |
 |--------|------------------------------|
-|   utr    | The Unique Tax Reference or Agent-Code or Org-Id |
+|   sa/org/ac   | unique auth identifier for clients/agents |
+
+Response status codes:
+
+| Status | Message     |
+|-------|-------------|
+| 200   | Ok          |
+| 400   | Bad Request |
+| 404   | Not Found   |
+| 500   | Internal Server Error |
+| 503   | Service Unavailable |
+
 
 #### Example of usage for individual or Agent
 
@@ -120,16 +131,26 @@ The request must be a valid json using one of the following uris
 
 | PATH | Supported Methods | Description |
 |------|-------------------|-------------|
-|```/sa/:utr/business-customer/update/:safeId ``` | POST | registers a SA user|
-|```/org/:utr/business-customer/update/:safeId ``` | POST | registers an Org user |
-|```/agent/:utr/business-customer/update/:safeId ``` | POST | registers an agent |
+|```/sa/:sa/business-customer/update/:safeId ``` | POST | registers a SA user|
+|```/org/:org/business-customer/update/:safeId ``` | POST | registers an Org user |
+|```/agent/:ac/business-customer/update/:safeId ``` | POST | registers an agent |
 
 Where:
 
 | Parameter | Message |
-|--------|------------|
-|   utr    | The Unique Tax Reference or Agent-Code or Org-Id |
+|--------|------------------------------|
+|   sa/org/ac    | unique auth id for clients/agents |
 |   safeId    | ID generated when registered in ETMP - Register Once in ROSM (Register Once Subscribe Many) structure |
+
+Response status codes:
+
+| Status | Message     |
+|-------|-------------|
+| 200   | Ok          |
+| 400   | Bad Request |
+| 404   | Not Found   |
+| 500   | Internal Server Error |
+| 503   | Service Unavailable |
 
 #### Example of usage for individual or Agent
 
@@ -233,16 +254,22 @@ The request must be a valid json using one of the following uris
 
 | PATH | Supported Methods | Description |
 |------|-------------------|-------------|
-|```/agent/:utr/business-customer/:serviceName/known-facts``` | POST | agents adds known-facts |
+|```/agent/:ac/business-customer/:serviceName/known-facts``` | POST | agents adds known-facts |
 
- POST  /agent/:utr/business-customer/:serviceName/known-facts: Agents should call this
+ POST  /agent/:ac/business-customer/:serviceName/known-facts: Agents should call this
 
 Where:
 
 | Parameter | Message |
-|--------|------------|
-|   utr    | The unique reference of user, for agents Agent-Code |
-|   serviceName    | name of service against which person has to enrol |
+|--------|------------------------------|
+|   ac    | unique auth identifier for agents|
+|   serviceName    | name of service for which agent has to enrol |
+
+Response status codes:
+
+| Status | Message     |
+|-------|-------------|
+| 200   | Ok          |
 
 #### Example of usage
 

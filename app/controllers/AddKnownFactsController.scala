@@ -27,7 +27,7 @@ trait AddKnownFactsController extends BaseController {
 
   def ggAdminConnector: GovernmentGatewayAdminConnector
 
-  def addKnownFacts(utr: String, serviceName: String) = Action.async {
+  def addKnownFacts(id: String, serviceName: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>

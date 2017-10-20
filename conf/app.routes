@@ -1,14 +1,14 @@
 # microservice specific routes
 
 ## update registration for clients and agents
-POST    /agent/:utr/business-customer/update/:safeId                controllers.AgentUpdateBusinessRegistrationController.update(utr: String, safeId: String)
-POST    /org/:utr/business-customer/update/:safeId                  controllers.UpdateBusinessRegistrationController.update(utr: String, safeId: String)
-POST    /sa/:utr/business-customer/update/:safeId                   controllers.SaUpdateBusinessRegistrationController.update(utr: String, safeId: String)
+POST    /agent/:ac/business-customer/update/:safeId                 controllers.AgentUpdateBusinessRegistrationController.update(ac: String, safeId: String)
+POST    /org/:org/business-customer/update/:safeId                  controllers.UpdateBusinessRegistrationController.update(org: String, safeId: String)
+POST    /sa/:sa/business-customer/update/:safeId                    controllers.SaUpdateBusinessRegistrationController.update(sa: String, safeId: String)
 
 ## register Non-UK clients and agents
-POST    /agent/:utr/business-customer/register                      controllers.AgentBusinessRegistrationController.register(utr: String)
-POST    /org/:utr/business-customer/register                        controllers.BusinessRegistrationController.register(utr: String)
-POST    /sa/:utr/business-customer/register                         controllers.SaBusinessRegistrationController.register(utr: String)
+POST    /agent/:ac/business-customer/register                       controllers.AgentBusinessRegistrationController.register(ac: String)
+POST    /org/:org/business-customer/register                        controllers.BusinessRegistrationController.register(org: String)
+POST    /sa/:sa/business-customer/register                          controllers.SaBusinessRegistrationController.register(sa: String)
 
 ## add known facts for agent
-POST    /agent/:utr/business-customer/:serviceName/known-facts      controllers.AddKnownFactsController.addKnownFacts(utr: String, serviceName: String)
+POST    /agent/:ac/business-customer/:serviceName/known-facts       controllers.AddKnownFactsController.addKnownFacts(ac: String, serviceName: String)
