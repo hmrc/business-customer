@@ -37,8 +37,8 @@ Response status codes:
 
 #### Example of usage for individual or Agent
 
- POST /agent/123456789/business-customer/register
- POST /sa/123456789/business-customer/register
+ ```POST /agent/123456789/business-customer/register```
+ ```POST /sa/123456789/business-customer/register```
 
  **Request body**
 
@@ -84,7 +84,7 @@ Response status codes:
 
 #### Example of usage for organisation
 
- POST /org/123456789/business-customer/register
+ ```POST /org/123456789/business-customer/register```
 
  **Request body**
 
@@ -154,8 +154,8 @@ Response status codes:
 
 #### Example of usage for individual or Agent
 
- POST /agent/123456789/business-customer/update/XE0001234567890
- POST /sa/123456789/business-customer/update/XE0001234567890
+ ```POST /agent/123456789/business-customer/update/XE0001234567890```
+ ```POST /sa/123456789/business-customer/update/XE0001234567890```
 
  **Request body**
 
