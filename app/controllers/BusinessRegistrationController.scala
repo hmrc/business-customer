@@ -41,6 +41,21 @@ trait BusinessRegistrationController extends BaseController {
       }
   }
 
+  def registerV2(id: String) = Action.async {
+    implicit request =>
+      val json = request.body.asJson.get
+      desConnector.registerV2(json).map { registerResponse =>
+        registerResponse.status match {
+          case OK => Ok(registerResponse.body)
+          case NOT_FOUND => NotFound(registerResponse.body)
+          case BAD_REQUEST => BadRequest(registerResponse.body)
+          case SERVICE_UNAVAILABLE => ServiceUnavailable(registerResponse.body)
+          case INTERNAL_SERVER_ERROR | _ => InternalServerError(registerResponse.body)
+        }
+      }
+  }
+
+
 }
 
 object BusinessRegistrationController extends BusinessRegistrationController {

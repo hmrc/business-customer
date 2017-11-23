@@ -36,6 +36,8 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
 
   def registerUri: String
 
+  def registerV2Uri: String
+
   def urlHeaderEnvironment: String
 
   def urlHeaderAuthorization: String
@@ -64,6 +66,39 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
     implicit val hc = createHeaderCarrier
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
     http.POST(s"$serviceUrl$registerUri", registerData).map { response =>
+      timerContext.stop()
+      auditRegister(registerData, response)
+      response.status match {
+        case OK =>
+          metrics.incrementSuccessCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
+          response
+        case status =>
+          metrics.incrementFailedCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
+          Logger.warn(s"[ETMPConnector][register] - status: $status")
+          doFailedAudit("registerFailed", registerData.toString, response.body)
+          response
+      }
+    }
+  }
+
+  def registerV2(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
+      val status = response.status match {
+        case OK => EventTypes.Succeeded
+        case _ => EventTypes.Failed
+      }
+      sendDataEvent(transactionName = "etmpRegister",
+        detail = Map("txName" -> "etmpRegister",
+          "registerData" -> s"$registerData",
+          "responseStatus" -> s"${response.status}",
+          "responseBody" -> s"${response.body}",
+          "status" -> s"$status"
+        ))
+    }
+
+    implicit val hc = createHeaderCarrier
+    val timerContext = metrics.startTimer(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
+    http.POST(s"$serviceUrl$registerV2Uri", registerData).map { response =>
       timerContext.stop()
       auditRegister(registerData, response)
       response.status match {
@@ -124,6 +159,7 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
 object EtmpConnector extends EtmpConnector {
   val serviceUrl = baseUrl("etmp-hod")
   val registerUri = "/registration/organisation"
+  val registerV2Uri = "/registration/02.00.00/organisation"
   val updateRegistrationDetailsUri = "/registration/safeid"
   val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
   val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
