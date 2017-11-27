@@ -49,6 +49,7 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
   object TestEtmpConnector extends EtmpConnector {
     override val serviceUrl = ""
     override val registerUri = "/registration/organisation"
+    override val registerV2Uri = "/registration/02.00.00/organisation"
     override val updateRegistrationDetailsUri = "/registration/safeid"
     override val http: CorePost with CorePut = mockWSHttp
     override val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
@@ -125,6 +126,52 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
         Future.successful(HttpResponse(BAD_REQUEST, responseJson = Some(successResponse)))
       }
       val result = TestEtmpConnector.register(inputJsonForNUK)
+      await(result).json must be(successResponse)
+    }
+
+    "for a successful registration(v2), return registration response" in {
+      val inputJsonForNUK = Json.parse(
+        """
+          |{
+          |  "businessName": "ACME",
+          |  "businessAddress": {
+          |    "line_1": "111",
+          |    "line_2": "ABC Street",
+          |    "line_3": "ABC city",
+          |    "line_4": "ABC 123",
+          |    "country": "ABC"
+          |  }
+          |}
+        """.stripMargin)
+
+      implicit val hc = HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())) thenReturn {
+        Future.successful(HttpResponse(OK, responseJson = Some(successResponse)))
+      }
+      val result = TestEtmpConnector.registerV2(inputJsonForNUK)
+      await(result).json must be(successResponse)
+    }
+
+    "for a failed registration(v2), return registration response" in {
+      val inputJsonForNUK = Json.parse(
+        """
+          |{
+          |  "businessName": "ACME",
+          |  "businessAddress": {
+          |    "line_1": "111",
+          |    "line_2": "ABC Street",
+          |    "line_3": "ABC city",
+          |    "line_4": "ABC 123",
+          |    "country": "ABC"
+          |  }
+          |}
+        """.stripMargin)
+
+      implicit val hc = HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())) thenReturn {
+        Future.successful(HttpResponse(BAD_REQUEST, responseJson = Some(successResponse)))
+      }
+      val result = TestEtmpConnector.registerV2(inputJsonForNUK)
       await(result).json must be(successResponse)
     }
 

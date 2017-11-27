@@ -11,9 +11,9 @@ POST    /org/:org/business-customer/register                        controllers.
 POST    /sa/:sa/business-customer/register                          controllers.SaBusinessRegistrationController.register(sa: String)
 
 ## register Non-UK clients - for API 2 v2
-POST    /agent/:ac/business-customer/register/v2                    controllers.AgentBusinessRegistrationController.registerv2(ac: String)
-POST    /org/:org/business-customer/register/v2                     controllers.BusinessRegistrationController.registerv2(org: String)
-POST    /sa/:sa/business-customer/register/v2                       controllers.SaBusinessRegistrationController.registerv2(sa: String)
+POST    /agent/:ac/business-customer/register/v2                    controllers.AgentBusinessRegistrationController.registerV2(ac: String)
+POST    /org/:org/business-customer/register/v2                     controllers.BusinessRegistrationController.registerV2(org: String)
+POST    /sa/:sa/business-customer/register/v2                       controllers.SaBusinessRegistrationController.registerV2(sa: String)
 
 ## add known facts for agent
 POST    /agent/:ac/business-customer/:serviceName/known-facts       controllers.AddKnownFactsController.addKnownFacts(ac: String, serviceName: String)
