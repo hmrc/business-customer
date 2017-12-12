@@ -27,10 +27,10 @@ trait AddKnownFactsController extends BaseController {
 
   def ggAdminConnector: GovernmentGatewayAdminConnector
 
-  def addKnownFacts(id: String, serviceName: String) = Action.async {
+  def addKnownFacts(id: String, serviceName: String, arn: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
-      ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>
+      ggAdminConnector.addKnownFacts(serviceName, json, arn).map { addKnownFactResponse =>
         addKnownFactResponse.status match {
           case OK => Ok(addKnownFactResponse.body)
           case _ =>
