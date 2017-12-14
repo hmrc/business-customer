@@ -16,21 +16,37 @@
 
 package controllers
 
-import connectors.GovernmentGatewayAdminConnector
+import connectors.{GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
 import play.api.Logger
 import play.api.mvc.Action
 import uk.gov.hmrc.play.microservice.controller.BaseController
+
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait AddKnownFactsController extends BaseController {
 
   def ggAdminConnector: GovernmentGatewayAdminConnector
+  def taxEnrolmentConnector: TaxEnrolmentsConnector
 
-  def addKnownFacts(id: String, serviceName: String, arn: String) = Action.async {
+  def newAddKnownFacts(id: String, serviceName: String, arn: String) = Action.async {
     implicit request =>
       val json = request.body.asJson.get
-      ggAdminConnector.addKnownFacts(serviceName, json, arn).map { addKnownFactResponse =>
+      taxEnrolmentConnector.addKnownFacts(serviceName, json, arn).map { addKnownFactResponse =>
+        addKnownFactResponse.status match {
+          case OK => Ok(addKnownFactResponse.body)
+          case _ =>
+            Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
+              s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
+            Ok(addKnownFactResponse.body)
+        }
+      }
+  }
+
+  def addKnownFacts(id: String, serviceName: String) = Action.async {
+    implicit request =>
+      val json = request.body.asJson.get
+      ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>
         addKnownFactResponse.status match {
           case OK => Ok(addKnownFactResponse.body)
           case _ =>
@@ -45,4 +61,5 @@ trait AddKnownFactsController extends BaseController {
 
 object AddKnownFactsController extends AddKnownFactsController {
   val ggAdminConnector: GovernmentGatewayAdminConnector = GovernmentGatewayAdminConnector
+  val taxEnrolmentConnector: TaxEnrolmentsConnector = TaxEnrolmentsConnector
 }

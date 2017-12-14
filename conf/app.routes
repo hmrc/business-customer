@@ -10,5 +10,8 @@ POST    /agent/:ac/business-customer/register                       controllers.
 POST    /org/:org/business-customer/register                        controllers.BusinessRegistrationController.register(org: String)
 POST    /sa/:sa/business-customer/register                          controllers.SaBusinessRegistrationController.register(sa: String)
 
-## add known facts for agent
-POST    /agent/:ac/business-customer/:serviceName/known-facts/:arn       controllers.AddKnownFactsController.addKnownFacts(ac: String, serviceName: String, arn: String)
+## new add known facts for agent
+POST    /agent/:ac/business-customer/:serviceName/known-facts/:arn       controllers.AddKnownFactsController.newAddKnownFacts(ac: String, serviceName: String, arn: String)
+
+## old add known facts for agent
+POST    /agent/:ac/business-customer/:serviceName/known-facts            controllers.AddKnownFactsController.addKnownFacts(ac: String, serviceName: String)
