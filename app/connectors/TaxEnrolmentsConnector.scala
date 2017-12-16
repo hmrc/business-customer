@@ -66,8 +66,8 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
       case OK => EventTypes.Succeeded
       case _ => EventTypes.Failed
     }
-    sendDataEvent(transactionName = "ggAddKnownFacts",
-      detail = Map("txName" -> "ggAddKnownFacts",
+    sendDataEvent(transactionName = "emacAddKnownFactsES06",
+      detail = Map("txName" -> "emacAddKnownFacts",
         "serviceName" -> s"$serviceName",
         "knownFacts" -> s"$knownFacts",
         "responseStatus" -> s"${response.status}",
