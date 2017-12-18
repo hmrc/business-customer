@@ -21,14 +21,14 @@ import config.{MicroserviceAuditConnector, WSHttp}
 import metrics.{Metrics, MetricsEnum}
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseReads with Auditable {
+trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with Auditable {
 
   def serviceUrl: String
 
@@ -36,12 +36,16 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
 
   def metrics: Metrics
 
-  def http: CorePost
+  def http: CorePut
 
-  def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier) = {
-    val postUrl = s"$ggaBaseUrl/$serviceName/known-facts"
+  def addKnownFacts(serviceName: String, knownFacts: JsValue, arn: String)(implicit hc: HeaderCarrier) = {
+
+    val agentRefIdentifier = "AgentRefNumber"
+    val enrolmentKey = s"$serviceName~$agentRefIdentifier~$arn" // TODO: refactor to createEnrolmentKey method
+    val putUrl = s"$ggaBaseUrl/$enrolmentKey"
+
     val timerContext = metrics.startTimer(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-    http.POST[JsValue, HttpResponse](postUrl, knownFacts) map { response =>
+    http.PUT[JsValue, HttpResponse](putUrl, knownFacts) map { response =>
       timerContext.stop()
       auditAddKnownFacts(serviceName, knownFacts, response)
       response.status match {
@@ -62,8 +66,8 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
       case OK => EventTypes.Succeeded
       case _ => EventTypes.Failed
     }
-    sendDataEvent(transactionName = "ggAddKnownFacts",
-      detail = Map("txName" -> "ggAddKnownFacts",
+    sendDataEvent(transactionName = "emacAddKnownFactsES06",
+      detail = Map("txName" -> "emacAddKnownFacts",
         "serviceName" -> s"$serviceName",
         "knownFacts" -> s"$knownFacts",
         "responseStatus" -> s"${response.status}",
@@ -73,9 +77,9 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
 
 }
 
-object GovernmentGatewayAdminConnector extends GovernmentGatewayAdminConnector {
-  val serviceUrl = baseUrl("government-gateway-admin")
-  val ggaBaseUrl = s"$serviceUrl/government-gateway-admin/service"
+object TaxEnrolmentsConnector extends TaxEnrolmentsConnector {
+  val serviceUrl = baseUrl("tax-enrolments")
+  val ggaBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
   val metrics = Metrics
   val http = WSHttp
   val audit: Audit = new Audit(AppName.appName, MicroserviceAuditConnector)
