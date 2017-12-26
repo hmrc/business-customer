@@ -49,7 +49,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with OneServerPerSuite with Mo
 
   object TestTaxEnrolmentsConnector extends TaxEnrolmentsConnector {
     override val serviceUrl = ""
-    override val ggaBaseUrl = ""
+    override val emacBaseUrl = ""
     override val http: CorePut = mockWSHttp
     override val audit: Audit = new TestAudit
     override val appName: String = "Test"
