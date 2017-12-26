@@ -21,7 +21,6 @@ import play.api.Logger
 import play.api.mvc.Action
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait AddKnownFactsController extends BaseController {
