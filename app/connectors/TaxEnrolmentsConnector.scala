@@ -32,7 +32,7 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
 
   def serviceUrl: String
 
-  def ggaBaseUrl: String
+  def emacBaseUrl: String
 
   def metrics: Metrics
 
@@ -42,19 +42,19 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
 
     val agentRefIdentifier = "AgentRefNumber"
     val enrolmentKey = s"$serviceName~$agentRefIdentifier~$arn" // TODO: refactor to createEnrolmentKey method
-    val putUrl = s"$ggaBaseUrl/$enrolmentKey"
+    val putUrl = s"$emacBaseUrl/$enrolmentKey"
 
-    val timerContext = metrics.startTimer(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
+    val timerContext = metrics.startTimer(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
     http.PUT[JsValue, HttpResponse](putUrl, knownFacts) map { response =>
       timerContext.stop()
       auditAddKnownFacts(serviceName, knownFacts, response)
       response.status match {
         case OK =>
-          metrics.incrementSuccessCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
+          metrics.incrementSuccessCounter(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
           response
         case status =>
-          metrics.incrementFailedCounter(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-          Logger.warn(s"[GovernmentGatewayAdminConnector][addKnownFacts] - status: $status")
+          metrics.incrementFailedCounter(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
+          Logger.warn(s"[TaxEnrolmentsConnector][addKnownFacts] - status: $status")
           doFailedAudit("addKnownFacts", knownFacts.toString, response.body)
           response
       }
@@ -78,8 +78,8 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
 }
 
 object TaxEnrolmentsConnector extends TaxEnrolmentsConnector {
-  val serviceUrl = baseUrl("tax-enrolments")
-  val ggaBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
+  val serviceUrl = baseUrl("enrolment-store-proxy")
+  val emacBaseUrl = s"$serviceUrl/enrolment-store-proxy/enrolment-store/enrolments"
   val metrics = Metrics
   val http = WSHttp
   val audit: Audit = new Audit(AppName.appName, MicroserviceAuditConnector)
