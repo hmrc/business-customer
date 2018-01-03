@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,11 +72,11 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with OneServerPerSuite with Mo
     "for successful set of known facts, return response" in {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.PUT[JsValue, HttpResponse](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).
-        thenReturn(Future.successful(HttpResponse(OK, responseJson = Some(successfulJson))))
+        thenReturn(Future.successful(HttpResponse(NO_CONTENT, responseJson = Some(successfulJson))))
 
       val knownFacts = Json.toJson("")
       val result = TestTaxEnrolmentsConnector.addKnownFacts("ATED", knownFacts, "JARN123456")
-      await(result).status must be(OK)
+      await(result).status must be(NO_CONTENT)
     }
 
     "for unsuccessful call of known facts, return response" in {
