@@ -49,7 +49,7 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
       timerContext.stop()
       auditAddKnownFacts(serviceName, knownFacts, response)
       response.status match {
-        case OK =>
+        case NO_CONTENT =>
           metrics.incrementSuccessCounter(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
           response
         case status =>
@@ -63,7 +63,7 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
 
   private def auditAddKnownFacts(serviceName: String, knownFacts: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
     val status = response.status match {
-      case OK => EventTypes.Succeeded
+      case NO_CONTENT => EventTypes.Succeeded
       case _ => EventTypes.Failed
     }
     sendDataEvent(transactionName = "emacAddKnownFactsES06",
