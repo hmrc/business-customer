@@ -35,7 +35,7 @@ trait AddKnownFactsController extends BaseController {
         addKnownFactResponse.status match {
           case OK => Ok(addKnownFactResponse.body)
           case _ =>
-            Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
+            Logger.warn(s"[AddKnownFactsController][newAddKnownFacts] - add known fact failed " +
               s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
             Ok(addKnownFactResponse.body)
         }

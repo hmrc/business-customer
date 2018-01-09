@@ -47,7 +47,7 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
     val timerContext = metrics.startTimer(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
     http.PUT[JsValue, HttpResponse](putUrl, knownFacts) map { response =>
       timerContext.stop()
-      auditAddKnownFacts(serviceName, knownFacts, response)
+      auditAddKnownFacts(putUrl, serviceName, knownFacts, response)
       response.status match {
         case NO_CONTENT =>
           metrics.incrementSuccessCounter(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
@@ -61,7 +61,10 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
     }
   }
 
-  private def auditAddKnownFacts(serviceName: String, knownFacts: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
+  private def auditAddKnownFacts(putUrl: String,
+                                 serviceName: String,
+                                 knownFacts: JsValue,
+                                 response: HttpResponse)(implicit hc: HeaderCarrier) = {
     val status = response.status match {
       case NO_CONTENT => EventTypes.Succeeded
       case _ => EventTypes.Failed
@@ -69,7 +72,8 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
     sendDataEvent(transactionName = "emacAddKnownFactsES06",
       detail = Map("txName" -> "emacAddKnownFacts",
         "serviceName" -> s"$serviceName",
-        "knownFacts" -> s"$knownFacts",
+        "putUrl" -> s"$putUrl",
+        "requestBody" -> s"$knownFacts",
         "responseStatus" -> s"${response.status}",
         "responseBody" -> s"${response.body}",
         "status" -> s"$status"))
