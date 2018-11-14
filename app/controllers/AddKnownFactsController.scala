@@ -47,7 +47,7 @@ trait AddKnownFactsController extends BaseController {
       val json = request.body.asJson.get
       ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>
         addKnownFactResponse.status match {
-          case OK => Ok(addKnownFactResponse.body)
+          case NO_CONTENT => NoContent
           case _ =>
             Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
               s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
