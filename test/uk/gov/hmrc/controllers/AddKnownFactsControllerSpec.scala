@@ -50,7 +50,7 @@ class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with M
 
     "known-facts" must {
       val ggSuccess = Json.parse( """{"rowModified":"1"}""")
-      val ggSuccessResponse = HttpResponse(OK, responseJson = Some(ggSuccess))
+      val ggSuccessResponse = HttpResponse(NO_CONTENT, responseJson = Some(ggSuccess))
       val ggFailure = Json.parse("""{"error": "some constraint violation"}""")
       val ggFailureResponse = HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(ggFailure))
 
@@ -58,8 +58,7 @@ class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with M
         val inputJson = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
         when(mockGGAdminConnector.addKnownFacts(Matchers.any(), Matchers.any())(Matchers.any())).thenReturn(Future.successful(ggSuccessResponse))
         val result = TestAddKnownFactsController.addKnownFacts(utr, "ATED").apply(FakeRequest().withJsonBody(inputJson))
-        status(result) must be(OK)
-        contentType(result).get must be("text/plain")
+        status(result) must be(NO_CONTENT)
       }
 
       "for an unsuccessful add known fact call, still return status as OK" in {
@@ -72,7 +71,7 @@ class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with M
 
     "add new known-facts" must {
       val ggSuccess = Json.parse( """{"rowModified":"1"}""")
-      val ggSuccessResponse = HttpResponse(OK, responseJson = Some(ggSuccess))
+      val ggSuccessResponse = HttpResponse(NO_CONTENT, responseJson = Some(ggSuccess))
       val ggFailure = Json.parse("""{"error": "some constraint violation"}""")
       val ggFailureResponse = HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(ggFailure))
 
@@ -80,8 +79,7 @@ class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with M
         val inputJson = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
         when(mockTaxEnrolmentConnector.addKnownFacts(Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any())).thenReturn(Future.successful(ggSuccessResponse))
         val result = TestAddKnownFactsController.newAddKnownFacts(utr, "ATED", "JARN123456").apply(FakeRequest().withJsonBody(inputJson))
-        status(result) must be(OK)
-        contentType(result).get must be("text/plain")
+        status(result) must be(NO_CONTENT)
       }
 
       "for an unsuccessful add known fact call, still return status as OK" in {
