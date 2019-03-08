@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package connectors
 import audit.Auditable
 import config.{MicroserviceAuditConnector, WSHttp}
 import metrics.{Metrics, MetricsEnum}
-import play.api.Logger
+import play.api.Mode.Mode
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
+import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -33,17 +34,11 @@ import scala.concurrent.Future
 trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads {
 
   def serviceUrl: String
-
   def registerUri: String
-
   def urlHeaderEnvironment: String
-
   def urlHeaderAuthorization: String
-
   def updateRegistrationDetailsUri: String
-
   def metrics: Metrics
-
   def http: CorePut with CorePost
 
   def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -115,10 +110,8 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
     }
   }
 
-
   def createHeaderCarrier: HeaderCarrier =
     HeaderCarrier(extraHeaders = Seq("Environment" -> urlHeaderEnvironment), authorization = Some(Authorization(urlHeaderAuthorization)))
-
 }
 
 object EtmpConnector extends EtmpConnector {
@@ -129,6 +122,8 @@ object EtmpConnector extends EtmpConnector {
   val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
   val metrics = Metrics
   val http = WSHttp
-  val audit: Audit = new Audit(AppName.appName, MicroserviceAuditConnector)
-  val appName: String = AppName.appName
+  val audit: Audit = new Audit(appName, MicroserviceAuditConnector)
+  val appName: String = appName
+  override protected def mode: Mode = Play.current.mode
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

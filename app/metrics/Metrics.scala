@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,13 @@ package metrics
 
 import com.codahale.metrics.Timer
 import com.codahale.metrics.Timer.Context
-import com.kenshoo.play.metrics.MetricsRegistry
 import metrics.MetricsEnum.MetricsEnum
 import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
 trait Metrics {
 
   def startTimer(api: MetricsEnum): Timer.Context
-
   def incrementSuccessCounter(api: MetricsEnum): Unit
-
   def incrementFailedCounter(api: MetricsEnum): Unit
 
 }
@@ -56,9 +53,7 @@ object Metrics extends Metrics with MicroserviceMetrics{
   )
 
   override def startTimer(api: MetricsEnum): Context = timers(api).time()
-
   override def incrementSuccessCounter(api: MetricsEnum): Unit = successCounters(api).inc()
-
   override def incrementFailedCounter(api: MetricsEnum): Unit = failedCounters(api).inc()
 
 }

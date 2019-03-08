@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,10 @@ import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.audit.TestAudit
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.SessionId
@@ -41,6 +43,9 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
 
   object TestAuditConnector extends AuditConnector with AppName with RunMode {
     override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
+    override protected def appNameConfiguration: Configuration = Play.current.configuration
+    override protected def mode: Mode = Play.current.mode
+    override protected def runModeConfiguration: Configuration = Play.current.configuration
   }
 
   trait MockedVerbs extends CorePut with CorePost
@@ -53,11 +58,11 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
     override val http: CorePost with CorePut = mockWSHttp
     override val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
     override val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
-
     override val audit: Audit = new TestAudit
     override val appName: String = "Test"
-
     override val metrics = Metrics
+    override protected def mode: Mode = Play.current.mode
+    override protected def runModeConfiguration: Configuration = Play.current.configuration
   }
 
   before {

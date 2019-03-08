@@ -12,20 +12,18 @@ private object AppDependencies {
   import play.sbt.PlayImport._
   import play.core.PlayVersion
 
-  private val microserviceBootstrapVersion = "6.18.0"
-  private val domainVersion = "4.1.0"
+  private val microserviceBootstrapVersion = "10.4.0"
+  private val domainVersion = "5.3.0"
 
-  private val scalaTestVersion = "2.2.6"
+  private val scalaTestVersion = "3.0.6"
   private val pegdownVersion = "1.6.0"
-  private val scalaTestPlusVersion = "1.5.1"
+  private val scalaTestPlusVersion = "2.0.1"
 
   val compile = Seq(
 
     ws,
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
-    "uk.gov.hmrc" %% "domain" % domainVersion,
-    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.8",
-    "com.codahale.metrics" % "metrics-graphite" % "3.0.2"
+    "uk.gov.hmrc" %% "domain" % domainVersion
   )
 
   trait TestDependencies {
