@@ -25,7 +25,7 @@ import play.api.libs.json.JsValue
 import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -72,12 +72,12 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
 }
 
 object GovernmentGatewayAdminConnector extends GovernmentGatewayAdminConnector {
+  val appName: String = AppName(Play.current.configuration).appName
   val serviceUrl = baseUrl("government-gateway-admin")
   val ggaBaseUrl = s"$serviceUrl/government-gateway-admin/service"
   val metrics = Metrics
   val http = WSHttp
   val audit: Audit = new Audit(appName, MicroserviceAuditConnector)
-  val appName: String = appName
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
