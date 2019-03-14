@@ -26,7 +26,7 @@ import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -115,6 +115,7 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
 }
 
 object EtmpConnector extends EtmpConnector {
+  val appName: String = AppName(Play.current.configuration).appName
   val serviceUrl = baseUrl("etmp-hod")
   val registerUri = "/registration/organisation"
   val updateRegistrationDetailsUri = "/registration/safeid"
@@ -123,7 +124,6 @@ object EtmpConnector extends EtmpConnector {
   val metrics = Metrics
   val http = WSHttp
   val audit: Audit = new Audit(appName, MicroserviceAuditConnector)
-  val appName: String = appName
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
