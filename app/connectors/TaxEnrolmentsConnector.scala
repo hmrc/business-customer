@@ -17,26 +17,37 @@
 package connectors
 
 import audit.Auditable
-import config.{MicroserviceAuditConnector, WSHttp}
-import metrics.{Metrics, MetricsEnum}
-import play.api.Mode.Mode
+import javax.inject.Inject
+import metrics.{MetricsEnum, ServiceMetrics}
+import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with Auditable {
+class DefaultTaxEnrolmentsConnector @Inject()(val servicesConfig: ServicesConfig,
+                                              val metrics: ServiceMetrics,
+                                              val http: HttpClient,
+                                              val auditConnector: AuditConnector) extends TaxEnrolmentsConnector {
+  val serviceUrl = servicesConfig.baseUrl("tax-enrolments")
+  val emacBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
+  val audit: Audit = new Audit("business-customer", auditConnector)
+}
+
+trait TaxEnrolmentsConnector extends RawResponseReads with Auditable {
 
   def serviceUrl: String
   def emacBaseUrl: String
-  def metrics: Metrics
+  def metrics: ServiceMetrics
   def http: CorePut
 
-  def addKnownFacts(serviceName: String, knownFacts: JsValue, arn: String)(implicit hc: HeaderCarrier) = {
+  def addKnownFacts(serviceName: String, knownFacts: JsValue, arn: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val agentRefIdentifier = "AgentRefNumber"
     val enrolmentKey = s"$serviceName~$agentRefIdentifier~$arn" // TODO: refactor to createEnrolmentKey method
@@ -62,7 +73,7 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
   private def auditAddKnownFacts(putUrl: String,
                                  serviceName: String,
                                  knownFacts: JsValue,
-                                 response: HttpResponse)(implicit hc: HeaderCarrier) = {
+                                 response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
     val status = response.status match {
       case NO_CONTENT => EventTypes.Succeeded
       case _ => EventTypes.Failed
@@ -76,16 +87,4 @@ trait TaxEnrolmentsConnector extends ServicesConfig with RawResponseReads with A
         "responseBody" -> s"${response.body}",
         "status" -> s"$status"))
   }
-
-}
-
-object TaxEnrolmentsConnector extends TaxEnrolmentsConnector {
-  val appName: String = AppName(Play.current.configuration).appName
-  val serviceUrl = baseUrl("tax-enrolments")
-  val emacBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
-  val metrics = Metrics
-  val http = WSHttp
-  val audit: Audit = new Audit(appName, MicroserviceAuditConnector)
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

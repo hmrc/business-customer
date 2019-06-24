@@ -19,47 +19,39 @@ package uk.gov.hmrc.connectors
 import java.util.UUID
 
 import connectors.GovernmentGatewayAdminConnector
-import metrics.Metrics
+import metrics.ServiceMetrics
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
-import play.api.{Configuration, Play}
 import uk.gov.hmrc.audit.TestAudit
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.config.{AppName, RunMode}
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.Future
 
 class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
 
-  object TestAuditConnector extends AuditConnector with AppName with RunMode {
-    override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
-    override protected def appNameConfiguration: Configuration = Play.current.configuration
-    override protected def mode: Mode = Play.current.mode
-    override protected def runModeConfiguration: Configuration = Play.current.configuration
-  }
+  val mockWSHttp: HttpClient = mock[HttpClient]
+  val mockServiceMetrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
 
-  trait MockedVerbs extends CorePost
-  val mockWSHttp: CorePost = mock[MockedVerbs]
+  trait Setup {
+    class TestGGAdminConnector extends GovernmentGatewayAdminConnector {
+      override val serviceUrl = ""
+      override val ggaBaseUrl = ""
+      override val http: HttpClient = mockWSHttp
 
-  object TestGGAdminConnector extends GovernmentGatewayAdminConnector {
-    override val serviceUrl = ""
-    override val ggaBaseUrl = ""
-    override val http: CorePost = mockWSHttp
-    override val audit: Audit = new TestAudit
-    override val appName: String = "Test"
-    override def metrics = Metrics
-    override protected def mode: Mode = Play.current.mode
-    override protected def runModeConfiguration: Configuration = Play.current.configuration
+      override val audit: Audit = new TestAudit(app.injector.instanceOf[AuditConnector])
+      override def metrics: ServiceMetrics = mockServiceMetrics
+    }
+
+    val connector = new TestGGAdminConnector()
   }
 
   override def beforeEach = {
@@ -68,30 +60,26 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with OneServerPerSuit
 
   "GovernmentGatewayAdminConnector" must {
 
-    "use correct metrics" in {
-      GovernmentGatewayAdminConnector.metrics must be(Metrics)
-    }
-
     val successfulJson = Json.parse( """{"rowModified":"1"}""")
     val failureJson = Json.parse( """{"error":"Constraint error"}""")
 
-    "for successful set of known facts, return response" in {
+    "for successful set of known facts, return response" in new Setup {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).
         thenReturn(Future.successful(HttpResponse(OK, responseJson = Some(successfulJson))))
 
       val knownFacts = Json.toJson("")
-      val result = TestGGAdminConnector.addKnownFacts("ATED", knownFacts)
+      val result = connector.addKnownFacts("ATED", knownFacts)
       await(result).status must be(OK)
     }
 
-    "for unsuccessful call of known facts, return response" in {
+    "for unsuccessful call of known facts, return response" in new Setup {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).
         thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(failureJson))))
 
       val knownFacts = Json.toJson("")
-      val result = TestGGAdminConnector.addKnownFacts("ATED", knownFacts)
+      val result = connector.addKnownFacts("ATED", knownFacts)
       await(result).status must be(INTERNAL_SERVER_ERROR)
     }
 

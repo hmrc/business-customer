@@ -17,32 +17,47 @@
 package connectors
 
 import audit.Auditable
-import config.{MicroserviceAuditConnector, WSHttp}
-import metrics.{Metrics, MetricsEnum}
-import play.api.Mode.Mode
+import javax.inject.Inject
+import metrics.{MetricsEnum, ServiceMetrics}
+import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads {
+class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
+                                     val http: HttpClient,
+                                     val auditConnector: AuditConnector,
+                                     val metrics: ServiceMetrics) extends EtmpConnector {
+  val serviceUrl: String = servicesConfig.baseUrl("etmp-hod")
+  val registerUri = "/registration/organisation"
+  val updateRegistrationDetailsUri = "/registration/safeid"
+  val urlHeaderEnvironment: String = servicesConfig.getConfString("etmp-hod.environment", "")
+  val urlHeaderAuthorization: String = s"Bearer ${servicesConfig.getConfString("etmp-hod.authorization-token", "")}"
+}
+
+trait EtmpConnector extends RawResponseReads with Auditable {
 
   def serviceUrl: String
   def registerUri: String
   def urlHeaderEnvironment: String
   def urlHeaderAuthorization: String
   def updateRegistrationDetailsUri: String
-  def metrics: Metrics
-  def http: CorePut with CorePost
+  def auditConnector: AuditConnector
+
+  def metrics: ServiceMetrics
+  def http: HttpClient
+  def audit = new Audit("business-customer", auditConnector)
 
   def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
+    def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
       val status = response.status match {
         case OK => EventTypes.Succeeded
         case _ => EventTypes.Failed
@@ -112,18 +127,4 @@ trait EtmpConnector extends ServicesConfig with Auditable with RawResponseReads 
 
   def createHeaderCarrier: HeaderCarrier =
     HeaderCarrier(extraHeaders = Seq("Environment" -> urlHeaderEnvironment), authorization = Some(Authorization(urlHeaderAuthorization)))
-}
-
-object EtmpConnector extends EtmpConnector {
-  val appName: String = AppName(Play.current.configuration).appName
-  val serviceUrl = baseUrl("etmp-hod")
-  val registerUri = "/registration/organisation"
-  val updateRegistrationDetailsUri = "/registration/safeid"
-  val urlHeaderEnvironment: String = config("etmp-hod").getString("environment").getOrElse("")
-  val urlHeaderAuthorization: String = s"Bearer ${config("etmp-hod").getString("authorization-token").getOrElse("")}"
-  val metrics = Metrics
-  val http = WSHttp
-  val audit: Audit = new Audit(appName, MicroserviceAuditConnector)
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

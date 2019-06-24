@@ -22,15 +22,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 trait Auditable {
 
-  def appName: String
-
   def audit: Audit
 
   def sendDataEvent(transactionName: String,
                     path: String = "N/A",
                     tags: Map[String, String] = Map.empty[String, String],
                     detail: Map[String, String])(implicit hc: HeaderCarrier): Unit = {
-    audit.sendDataEvent(DataEvent(appName, auditType = transactionName,
+    audit.sendDataEvent(DataEvent("business-customer", auditType = transactionName,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)))
   }
