@@ -17,18 +17,27 @@
 package controllers
 
 import connectors.{GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.mvc.Action
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait AddKnownFactsController extends BaseController {
+@Singleton
+class DefaultAddKnownFactsController @Inject()(
+                                                cc: ControllerComponents,
+                                                val ggAdminConnector: GovernmentGatewayAdminConnector,
+                                                val taxEnrolmentConnector: TaxEnrolmentsConnector
+                                              ) extends BackendController(cc) with AddKnownFactsController {
+}
+
+trait AddKnownFactsController extends BackendController {
 
   def ggAdminConnector: GovernmentGatewayAdminConnector
   def taxEnrolmentConnector: TaxEnrolmentsConnector
 
-  def newAddKnownFacts(id: String, serviceName: String, arn: String) = Action.async {
+  def newAddKnownFacts(id: String, serviceName: String, arn: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       taxEnrolmentConnector.addKnownFacts(serviceName, json, arn).map { addKnownFactResponse =>
@@ -42,7 +51,7 @@ trait AddKnownFactsController extends BaseController {
       }
   }
 
-  def addKnownFacts(id: String, serviceName: String) = Action.async {
+  def addKnownFacts(id: String, serviceName: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>
@@ -55,10 +64,4 @@ trait AddKnownFactsController extends BaseController {
         }
       }
   }
-
-}
-
-object AddKnownFactsController extends AddKnownFactsController {
-  val ggAdminConnector: GovernmentGatewayAdminConnector = GovernmentGatewayAdminConnector
-  val taxEnrolmentConnector: TaxEnrolmentsConnector = TaxEnrolmentsConnector
 }

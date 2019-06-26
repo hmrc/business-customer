@@ -2,16 +2,16 @@
 
 ## update registration for clients and agents
 POST    /agent/:ac/business-customer/update/:safeId                 controllers.AgentUpdateBusinessRegistrationController.update(ac: String, safeId: String)
-POST    /org/:org/business-customer/update/:safeId                  controllers.UpdateBusinessRegistrationController.update(org: String, safeId: String)
+POST    /org/:org/business-customer/update/:safeId                  controllers.DefaultUpdateBusinessRegistrationController.update(org: String, safeId: String)
 POST    /sa/:sa/business-customer/update/:safeId                    controllers.SaUpdateBusinessRegistrationController.update(sa: String, safeId: String)
 
 ## register Non-UK clients and agents
 POST    /agent/:ac/business-customer/register                       controllers.AgentBusinessRegistrationController.register(ac: String)
-POST    /org/:org/business-customer/register                        controllers.BusinessRegistrationController.register(org: String)
+POST    /org/:org/business-customer/register                        controllers.DefaultBusinessRegistrationController.register(org: String)
 POST    /sa/:sa/business-customer/register                          controllers.SaBusinessRegistrationController.register(sa: String)
 
 ## new add known facts for agent
-POST    /agent/:ac/business-customer/:serviceName/known-facts/:arn       controllers.AddKnownFactsController.newAddKnownFacts(ac: String, serviceName: String, arn: String)
+POST    /agent/:ac/business-customer/:serviceName/known-facts/:arn       controllers.DefaultAddKnownFactsController.newAddKnownFacts(ac: String, serviceName: String, arn: String)
 
 ## old add known facts for agent
-POST    /agent/:ac/business-customer/:serviceName/known-facts            controllers.AddKnownFactsController.addKnownFacts(ac: String, serviceName: String)
+POST    /agent/:ac/business-customer/:serviceName/known-facts            controllers.DefaultAddKnownFactsController.addKnownFacts(ac: String, serviceName: String)

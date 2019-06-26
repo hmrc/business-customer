@@ -17,17 +17,35 @@
 package controllers
 
 import connectors.EtmpConnector
-import play.api.Logger
-import play.api.mvc.Action
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import javax.inject.{Inject, Singleton}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait UpdateBusinessRegistrationController extends BaseController {
+@Singleton
+class DefaultUpdateBusinessRegistrationController @Inject()(
+                                                             cc: ControllerComponents,
+                                                             val desConnector: EtmpConnector
+                                                           ) extends BackendController(cc) with UpdateBusinessRegistrationController
+
+@Singleton
+class SaUpdateBusinessRegistrationController @Inject()(
+                                                        cc: ControllerComponents,
+                                                        val desConnector: EtmpConnector
+                                                      ) extends BackendController(cc) with UpdateBusinessRegistrationController
+
+@Singleton
+class AgentUpdateBusinessRegistrationController @Inject()(
+                                                           cc: ControllerComponents,
+                                                           val desConnector: EtmpConnector
+                                                         )extends BackendController(cc) with UpdateBusinessRegistrationController
+
+trait UpdateBusinessRegistrationController extends BackendController {
 
   def desConnector: EtmpConnector
 
-  def update(utr: String, safeId: String) = Action.async {
+  def update(utr: String, safeId: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.updateRegistrationDetails(safeId, json).map { updateResponse =>
@@ -41,16 +59,4 @@ trait UpdateBusinessRegistrationController extends BaseController {
       }
   }
 
-}
-
-object UpdateBusinessRegistrationController extends UpdateBusinessRegistrationController {
-  val desConnector: EtmpConnector = EtmpConnector
-}
-
-object SaUpdateBusinessRegistrationController extends UpdateBusinessRegistrationController {
-  val desConnector: EtmpConnector = EtmpConnector
-}
-
-object AgentUpdateBusinessRegistrationController extends UpdateBusinessRegistrationController {
-  val desConnector: EtmpConnector = EtmpConnector
 }

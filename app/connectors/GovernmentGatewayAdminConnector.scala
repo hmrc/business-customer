@@ -17,26 +17,37 @@
 package connectors
 
 import audit.Auditable
-import config.{MicroserviceAuditConnector, WSHttp}
-import metrics.{Metrics, MetricsEnum}
-import play.api.Mode.Mode
+import javax.inject.Inject
+import metrics.{MetricsEnum, ServiceMetrics}
+import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseReads with Auditable {
+class DefaultGovernmentGatewayAdminConnector @Inject()(val servicesConfig: ServicesConfig,
+                                                       val metrics: ServiceMetrics,
+                                                       val http: HttpClient,
+                                                       val auditConnector: AuditConnector) extends GovernmentGatewayAdminConnector {
+  val serviceUrl: String = servicesConfig.baseUrl("government-gateway-admin")
+  val ggaBaseUrl = s"$serviceUrl/government-gateway-admin/service"
+  val audit: Audit = new Audit("business-customer", auditConnector)
+}
+
+trait GovernmentGatewayAdminConnector extends RawResponseReads with Auditable {
 
   def serviceUrl: String
   def ggaBaseUrl: String
-  def metrics: Metrics
-  def http: CorePost
+  def metrics: ServiceMetrics
+  def http: HttpClient
 
-  def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier) = {
+  def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val postUrl = s"$ggaBaseUrl/$serviceName/known-facts"
     val timerContext = metrics.startTimer(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
     http.POST[JsValue, HttpResponse](postUrl, knownFacts) map { response =>
@@ -55,10 +66,10 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
     }
   }
 
-  private def auditAddKnownFacts(serviceName: String, knownFacts: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier) = {
-    val status = response.status match {
+  private def auditAddKnownFacts(serviceName: String, knownFacts: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
+    val status: String = response.status match {
       case OK => EventTypes.Succeeded
-      case _ => EventTypes.Failed
+      case _  => EventTypes.Failed
     }
     sendDataEvent(transactionName = "ggAddKnownFacts",
       detail = Map("txName" -> "ggAddKnownFacts",
@@ -68,16 +79,4 @@ trait GovernmentGatewayAdminConnector extends ServicesConfig with RawResponseRea
         "responseBody" -> s"${response.body}",
         "status" -> s"$status"))
   }
-
-}
-
-object GovernmentGatewayAdminConnector extends GovernmentGatewayAdminConnector {
-  val appName: String = AppName(Play.current.configuration).appName
-  val serviceUrl = baseUrl("government-gateway-admin")
-  val ggaBaseUrl = s"$serviceUrl/government-gateway-admin/service"
-  val metrics = Metrics
-  val http = WSHttp
-  val audit: Audit = new Audit(appName, MicroserviceAuditConnector)
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

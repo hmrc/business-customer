@@ -17,17 +17,34 @@
 package controllers
 
 import connectors.EtmpConnector
-import play.api.Logger
-import play.api.mvc.Action
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import javax.inject.{Inject, Singleton}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait BusinessRegistrationController extends BaseController {
+@Singleton
+class DefaultBusinessRegistrationController @Inject()(
+                                                      cc: ControllerComponents,
+                                                      val desConnector: EtmpConnector
+                                                     ) extends BackendController(cc) with BusinessRegistrationController
 
+@Singleton
+class SaBusinessRegistrationController @Inject()(
+                                                  cc: ControllerComponents,
+                                                  val desConnector: EtmpConnector
+                                                ) extends BackendController(cc) with BusinessRegistrationController
+
+@Singleton
+class AgentBusinessRegistrationController @Inject()(
+                                                     cc: ControllerComponents,
+                                                     val desConnector: EtmpConnector
+                                                   ) extends BackendController(cc) with BusinessRegistrationController
+
+trait BusinessRegistrationController extends BackendController {
   def desConnector: EtmpConnector
 
-  def register(id: String) = Action.async {
+  def register(id: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.register(json).map { registerResponse =>
@@ -40,17 +57,4 @@ trait BusinessRegistrationController extends BaseController {
         }
       }
   }
-
-}
-
-object BusinessRegistrationController extends BusinessRegistrationController {
-  val desConnector: EtmpConnector = EtmpConnector
-}
-
-object SaBusinessRegistrationController extends BusinessRegistrationController {
-  val desConnector: EtmpConnector = EtmpConnector
-}
-
-object AgentBusinessRegistrationController extends BusinessRegistrationController {
-  val desConnector: EtmpConnector = EtmpConnector
 }
