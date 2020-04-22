@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package uk.gov.hmrc.controllers
 
 import connectors.EtmpConnector
 import controllers.UpdateBusinessRegistrationController
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
@@ -58,7 +58,7 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with OneServerPe
       val safeId = "XE000123456789"
       "respond with OK" in new Setup {
         val inputJsonForNUK = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
-        when(mockDesConnector.updateRegistrationDetails(Matchers.eq(safeId), Matchers.any())(Matchers.any())).thenReturn(Future.successful(registerSuccessResponse))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
         val result = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(OK)
         contentType(result).get must be("text/plain")
@@ -67,7 +67,7 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with OneServerPe
 
       "for an unsuccessful match return Not found" in new Setup {
         val inputJsonForNUK = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
-        when(mockDesConnector.updateRegistrationDetails(Matchers.eq(safeId), Matchers.any())(Matchers.any())).thenReturn(Future.successful(matchFailureResponse))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(matchFailureResponse))
         val result = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(NOT_FOUND)
         contentAsJson(result) must be(matchFailureResponse.json)
@@ -76,7 +76,7 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with OneServerPe
       "for a bad request, return BadRequest" in new Setup {
         val inputJsonForNUK = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
         val badRequestJson = Json.parse("""{"reason" : "Bad Request"}""")
-        when(mockDesConnector.updateRegistrationDetails(Matchers.eq(safeId), Matchers.any())(Matchers.any())).thenReturn(Future.successful(HttpResponse(BAD_REQUEST, Some(badRequestJson))))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(BAD_REQUEST, Some(badRequestJson))))
         val result = controller.update(utr, safeId)(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) must be(badRequestJson)
@@ -85,7 +85,7 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with OneServerPe
       "for service unavailable, return service unavailable" in new Setup {
         val inputJsonForNUK = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
         val serviceUnavailable = Json.parse("""{"reason" : "Service unavailable"}""")
-        when(mockDesConnector.updateRegistrationDetails(Matchers.eq(safeId), Matchers.any())(Matchers.any())).thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE, Some(serviceUnavailable))))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE, Some(serviceUnavailable))))
         val result = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(SERVICE_UNAVAILABLE)
         contentAsJson(result) must be(serviceUnavailable)
@@ -94,7 +94,7 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with OneServerPe
       "internal server error, return internal server error" in new Setup {
         val inputJsonForNUK = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
         val serverError = Json.parse("""{"reason" : "Internal server error"}""")
-        when(mockDesConnector.updateRegistrationDetails(Matchers.eq(safeId), Matchers.any())(Matchers.any())).thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, Some(serverError))))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, Some(serverError))))
         val result = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(INTERNAL_SERVER_ERROR)
         contentAsJson(result) must be(serverError)
