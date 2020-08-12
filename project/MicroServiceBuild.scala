@@ -11,12 +11,12 @@ object AppSpecificDependencies extends TestDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "1.7.0",
-    "uk.gov.hmrc" %% "domain"            % "5.9.0-play-26"
+    "uk.gov.hmrc" %% "bootstrap-backend-play-27" % "2.24.0",
+    "uk.gov.hmrc" %% "domain"                    % "5.9.0-play-27"
   )
   val test: Seq[ModuleID] = Seq(
-    "org.scalatest"           %% "scalatest"          % "3.0.5"             % scope,
-    "org.scalatestplus.play"  %% "scalatestplus-play" % "3.1.2"             % scope,
+    "org.scalatest"           %% "scalatest"          % "3.0.8"             % scope,
+    "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3"             % scope,
     "org.pegdown"              % "pegdown"            % "1.6.0"             % scope,
     "com.typesafe.play"       %% "play-test"          % PlayVersion.current % scope,
     "org.mockito"              % "mockito-core"       % "3.3.3"             % scope,
