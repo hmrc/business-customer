@@ -20,15 +20,17 @@ import connectors._
 import metrics.{DefaultServiceMetrics, ServiceMetrics}
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.http.HttpClient
+import play.api.inject.{bind => playBind}
 
 class ServiceBindings extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
     Seq(
-      bind(classOf[EtmpConnector]).to(classOf[DefaultEtmpConnector]),
-      bind(classOf[GovernmentGatewayAdminConnector]).to(classOf[DefaultGovernmentGatewayAdminConnector]),
-      bind(classOf[TaxEnrolmentsConnector]).to(classOf[DefaultTaxEnrolmentsConnector]),
-      bind(classOf[ServiceMetrics]).to(classOf[DefaultServiceMetrics]),
-      bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
+      playBind(classOf[EtmpConnector]).to(classOf[DefaultEtmpConnector]),
+      playBind(classOf[GovernmentGatewayAdminConnector]).to(classOf[DefaultGovernmentGatewayAdminConnector]),
+      playBind(classOf[TaxEnrolmentsConnector]).to(classOf[DefaultTaxEnrolmentsConnector]),
+      playBind(classOf[ServiceMetrics]).to(classOf[DefaultServiceMetrics]),
+      playBind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
     )
 }

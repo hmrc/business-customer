@@ -19,14 +19,14 @@ package connectors
 import audit.Auditable
 import javax.inject.Inject
 import metrics.{MetricsEnum, ServiceMetrics}
-import play.api.Logger
+import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,7 +40,7 @@ class DefaultTaxEnrolmentsConnector @Inject()(val servicesConfig: ServicesConfig
   val audit: Audit = new Audit("business-customer", auditConnector)
 }
 
-trait TaxEnrolmentsConnector extends RawResponseReads with Auditable {
+trait TaxEnrolmentsConnector extends RawResponseReads with Auditable with Logging {
 
   def serviceUrl: String
   def emacBaseUrl: String
@@ -63,7 +63,7 @@ trait TaxEnrolmentsConnector extends RawResponseReads with Auditable {
           response
         case status =>
           metrics.incrementFailedCounter(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
-          Logger.warn(s"[TaxEnrolmentsConnector][addKnownFacts] - status: $status")
+          logger.warn(s"[TaxEnrolmentsConnector][addKnownFacts] - status: $status")
           doFailedAudit("addKnownFacts", knownFacts.toString, response.body)
           response
       }

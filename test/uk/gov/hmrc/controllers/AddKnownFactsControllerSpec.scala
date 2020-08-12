@@ -30,7 +30,7 @@ import uk.gov.hmrc.domain.SaUtrGenerator
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with MockitoSugar {
 

@@ -19,7 +19,7 @@ package connectors
 import audit.Auditable
 import javax.inject.Inject
 import metrics.{MetricsEnum, ServiceMetrics}
-import play.api.Logger
+import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,7 +43,7 @@ class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
   val urlHeaderAuthorization: String = s"Bearer ${servicesConfig.getConfString("etmp-hod.authorization-token", "")}"
 }
 
-trait EtmpConnector extends RawResponseReads with Auditable {
+trait EtmpConnector extends RawResponseReads with Auditable with Logging {
 
   def serviceUrl: String
   def registerUri: String
@@ -82,7 +82,7 @@ trait EtmpConnector extends RawResponseReads with Auditable {
           response
         case status =>
           metrics.incrementFailedCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-          Logger.warn(s"[ETMPConnector][register] - status: $status")
+          logger.warn(s"[ETMPConnector][register] - status: $status")
           doFailedAudit("registerFailed", registerData.toString, response.body)
           response
       }
@@ -118,7 +118,7 @@ trait EtmpConnector extends RawResponseReads with Auditable {
           response
         case status =>
           metrics.incrementFailedCounter(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
-          Logger.warn(s"[EtmpDetailsConnector][updateRegistrationDetails] - status: $status")
+          logger.warn(s"[EtmpDetailsConnector][updateRegistrationDetails] - status: $status")
           doFailedAudit("updateRegistrationDetailsFailed", updatedData.toString, response.body)
           response
       }

@@ -18,9 +18,9 @@ package controllers
 
 import connectors.{GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -32,7 +32,7 @@ class DefaultAddKnownFactsController @Inject()(
                                               ) extends BackendController(cc) with AddKnownFactsController {
 }
 
-trait AddKnownFactsController extends BackendController {
+trait AddKnownFactsController extends BackendController with Logging {
 
   def ggAdminConnector: GovernmentGatewayAdminConnector
   def taxEnrolmentConnector: TaxEnrolmentsConnector
@@ -44,7 +44,7 @@ trait AddKnownFactsController extends BackendController {
         addKnownFactResponse.status match {
           case NO_CONTENT => NoContent
           case _ =>
-            Logger.warn(s"[AddKnownFactsController][newAddKnownFacts] - add known fact failed " +
+            logger.warn(s"[AddKnownFactsController][newAddKnownFacts] - add known fact failed " +
               s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
             Ok(addKnownFactResponse.body)
         }
@@ -58,7 +58,7 @@ trait AddKnownFactsController extends BackendController {
         addKnownFactResponse.status match {
           case NO_CONTENT => NoContent
           case _ =>
-            Logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
+            logger.warn(s"[AddKnownFactsController][addKnownFacts] - add known fact failed " +
               s"- response.status = ${addKnownFactResponse.status} and response.body = ${addKnownFactResponse.body}")
             Ok(addKnownFactResponse.body)
         }

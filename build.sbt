@@ -29,7 +29,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 2,
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    scalaVersion := "2.12.10",
+    scalaVersion := "2.12.11",
     routesGenerator := InjectedRoutesGenerator,
     Keys.fork                  in IntegrationTest :=  false,
     unmanagedSourceDirectories in IntegrationTest :=  (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
