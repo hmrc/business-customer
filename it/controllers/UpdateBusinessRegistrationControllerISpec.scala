@@ -15,8 +15,6 @@ class UpdateBusinessRegistrationControllerISpec extends IntegrationSpec {
     s"/$userType/$name/business-customer/update/$userType" should {
       "lookup business details" when {
         "business details are available" in {
-          val utr = "2131231231"
-          val desType = if (userType == "sa") "sa" else "org"
 
           stubFor(put(urlMatching(s"/registration/safeid/$userType"))
             .willReturn(

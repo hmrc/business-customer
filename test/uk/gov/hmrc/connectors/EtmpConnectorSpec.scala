@@ -16,28 +16,24 @@
 
 package uk.gov.hmrc.connectors
 
-import java.util.UUID
-
 import connectors.EtmpConnector
 import metrics.ServiceMetrics
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.audit.TestAudit
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.Future
 
-class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSugar with BeforeAndAfter {
+class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfter {
 
   val mockWSHttp: HttpClient = mock[HttpClient]
   val mockServiceMetrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
@@ -58,11 +54,9 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
     val connector = new TestEtmpConnector()
   }
 
-
   before {
     reset(mockWSHttp)
   }
-
 
   "EtmpConnector" must {
 
@@ -92,9 +86,8 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
           |}
         """.stripMargin)
 
-      implicit val hc = HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())) thenReturn {
-        Future.successful(HttpResponse(OK, responseJson = Some(successResponse)))
+        Future.successful(HttpResponse(OK, successResponse.toString))
       }
       val result = connector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
@@ -115,9 +108,8 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
           |}
         """.stripMargin)
 
-      implicit val hc = HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())) thenReturn {
-        Future.successful(HttpResponse(BAD_REQUEST, responseJson = Some(successResponse)))
+        Future.successful(HttpResponse(BAD_REQUEST, successResponse.toString))
       }
       val result = connector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
@@ -141,10 +133,9 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
 
       "Correctly submit data if with a valid response" in new Setup {
         val successResponse = Json.parse( """{"processingDate": "2001-12-17T09:30:47Z"}""")
-        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
 
         when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(HttpResponse(OK, Some(successResponse))))
+          .thenReturn(Future.successful(HttpResponse(OK, successResponse.toString)))
 
         val result = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
         val response = await(result)
@@ -154,10 +145,9 @@ class EtmpConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSuga
 
       "submit data  with an invalid response" in new Setup {
         val notFoundResponse = Json.parse( """{}""")
-        implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
 
         when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(HttpResponse(NOT_FOUND, Some(notFoundResponse))))
+          .thenReturn(Future.successful(HttpResponse(NOT_FOUND, notFoundResponse.toString)))
 
         val result = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
         val response = await(result)

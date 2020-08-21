@@ -20,24 +20,23 @@ import java.util.UUID
 
 import connectors.TaxEnrolmentsConnector
 import metrics.ServiceMetrics
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.audit.TestAudit
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.Future
 
-class TaxEnrolmentsConnectorSpec extends PlaySpec with OneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
+class TaxEnrolmentsConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
 
   val mockWSHttp: HttpClient = mock[HttpClient]
   val mockServiceMetrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
@@ -66,7 +65,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with OneServerPerSuite with Mo
     "for successful set of known facts, return response" in new Setup {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())).
-        thenReturn(Future.successful(HttpResponse(NO_CONTENT, responseJson = Some(successfulJson))))
+        thenReturn(Future.successful(HttpResponse(NO_CONTENT, successfulJson.toString)))
 
       val knownFacts = Json.toJson("")
       val result = connector.addKnownFacts("ATED", knownFacts, "JARN123456")
@@ -76,7 +75,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with OneServerPerSuite with Mo
     "for unsuccessful call of known facts, return response" in new Setup {
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())).
-        thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(failureJson))))
+        thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, failureJson.toString)))
 
       val knownFacts = Json.toJson("")
       val result = connector.addKnownFacts("ATED", knownFacts, "JARN123456")

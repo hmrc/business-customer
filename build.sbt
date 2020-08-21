@@ -20,6 +20,7 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins : _*)
   .configs(IntegrationTest)
   .settings(
+    Compile / scalacOptions += "-P:silencer:pathFilters=target/.*",
     addTestReportOption(IntegrationTest, "int-test-reports"),
     inConfig(IntegrationTest)(Defaults.itSettings),
     scoverageSettings,

@@ -56,7 +56,7 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
   def http: HttpClient
   def audit = new Audit("business-customer", auditConnector)
 
-  def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def register(registerData: JsValue): Future[HttpResponse] = {
     def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
       val status = response.status match {
         case OK => EventTypes.Succeeded
@@ -89,7 +89,7 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
     }
   }
 
-  def updateRegistrationDetails(safeId: String, updatedData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def updateRegistrationDetails(safeId: String, updatedData: JsValue): Future[HttpResponse] = {
     def auditUpdateRegistrationDetails(safeId: String,
                                                updateData: JsValue,
                                                response: HttpResponse)(implicit hc: HeaderCarrier) {
