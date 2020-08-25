@@ -12,8 +12,11 @@ object AppSpecificDependencies extends TestDependencies {
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-backend-play-27" % "2.24.0",
-    "uk.gov.hmrc" %% "domain"                    % "5.9.0-play-27"
+    "uk.gov.hmrc" %% "domain"                    % "5.9.0-play-27",
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.1" cross CrossVersion.full),
+    "com.github.ghik" % "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
   )
+  
   val test: Seq[ModuleID] = Seq(
     "org.scalatest"           %% "scalatest"          % "3.0.8"             % scope,
     "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3"             % scope,

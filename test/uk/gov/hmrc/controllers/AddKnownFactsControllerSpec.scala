@@ -20,19 +20,20 @@ import connectors.{GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
 import controllers.AddKnownFactsController
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.SaUtrGenerator
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with MockitoSugar {
+import scala.concurrent.Future
+
+class AddKnownFactsControllerSpec extends PlaySpec with GuiceOneServerPerSuite with MockitoSugar {
 
   val mockGGAdminConnector: GovernmentGatewayAdminConnector = mock[GovernmentGatewayAdminConnector]
   val mockTaxEnrolmentConnector: TaxEnrolmentsConnector = mock[TaxEnrolmentsConnector]
@@ -55,9 +56,9 @@ class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with M
 
     "known-facts" must {
       val ggSuccess = Json.parse( """{"rowModified":"1"}""")
-      val ggSuccessResponse = HttpResponse(NO_CONTENT, responseJson = Some(ggSuccess))
+      val ggSuccessResponse = HttpResponse(NO_CONTENT, ggSuccess.toString)
       val ggFailure = Json.parse("""{"error": "some constraint violation"}""")
-      val ggFailureResponse = HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(ggFailure))
+      val ggFailureResponse = HttpResponse(INTERNAL_SERVER_ERROR, ggFailure.toString)
 
       "respond with OK for successful add known fact" in new Setup {
         val inputJson = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
@@ -76,9 +77,9 @@ class AddKnownFactsControllerSpec extends PlaySpec with OneServerPerSuite with M
 
     "add new known-facts" must {
       val ggSuccess = Json.parse( """{"rowModified":"1"}""")
-      val ggSuccessResponse = HttpResponse(NO_CONTENT, responseJson = Some(ggSuccess))
+      val ggSuccessResponse = HttpResponse(NO_CONTENT, ggSuccess.toString)
       val ggFailure = Json.parse("""{"error": "some constraint violation"}""")
-      val ggFailureResponse = HttpResponse(INTERNAL_SERVER_ERROR, responseJson = Some(ggFailure))
+      val ggFailureResponse = HttpResponse(INTERNAL_SERVER_ERROR, ggFailure.toString)
 
       "respond with OK for successful add known fact" in new Setup {
         val inputJson = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
