@@ -38,6 +38,8 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
   val mockWSHttp: HttpClient = mock[HttpClient]
   val mockServiceMetrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
 
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
   trait Setup {
     class TestEtmpConnector extends EtmpConnector {
       override val serviceUrl = ""

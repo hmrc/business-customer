@@ -17,18 +17,16 @@
 package connectors
 
 import audit.Auditable
-import javax.inject.Inject
 import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -56,8 +54,8 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
   def http: HttpClient
   def audit = new Audit("business-customer", auditConnector)
 
-  def register(registerData: JsValue): Future[HttpResponse] = {
-    def auditRegister(registerData: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
+  def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    def auditRegister(registerData: JsValue, response: HttpResponse): Unit = {
       val status = response.status match {
         case OK => EventTypes.Succeeded
         case _ => EventTypes.Failed
@@ -71,9 +69,8 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
         ))
     }
 
-    implicit val hc = createHeaderCarrier
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-    http.POST(s"$serviceUrl$registerUri", registerData).map { response =>
+    http.POST(s"$serviceUrl$registerUri", registerData, createHeaders).map { response =>
       timerContext.stop()
       auditRegister(registerData, response)
       response.status match {
@@ -89,10 +86,10 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
     }
   }
 
-  def updateRegistrationDetails(safeId: String, updatedData: JsValue): Future[HttpResponse] = {
+  def updateRegistrationDetails(safeId: String, updatedData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     def auditUpdateRegistrationDetails(safeId: String,
                                                updateData: JsValue,
-                                               response: HttpResponse)(implicit hc: HeaderCarrier) {
+                                               response: HttpResponse) {
       val status = response.status match {
         case OK => EventTypes.Succeeded
         case _ => EventTypes.Failed
@@ -106,10 +103,9 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
           "status" -> s"$status"))
     }
 
-    implicit val hc = createHeaderCarrier
     val putUrl = s"""$serviceUrl$updateRegistrationDetailsUri/$safeId"""
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
-    http.PUT(putUrl, updatedData).map { response =>
+    http.PUT(putUrl, updatedData, createHeaders).map { response =>
       timerContext.stop()
       auditUpdateRegistrationDetails(safeId, updatedData, response)
       response.status match {
@@ -125,6 +121,10 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
     }
   }
 
-  def createHeaderCarrier: HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> urlHeaderEnvironment), authorization = Some(Authorization(urlHeaderAuthorization)))
+  def createHeaders: Seq[(String, String)] = {
+    Seq(
+      "Environment"   -> urlHeaderEnvironment,
+      "Authorization" -> urlHeaderAuthorization
+    )
+  }
 }
