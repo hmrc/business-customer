@@ -54,7 +54,7 @@ trait TaxEnrolmentsConnector extends RawResponseReads with Auditable with Loggin
     val putUrl = s"$emacBaseUrl/$enrolmentKey"
 
     val timerContext = metrics.startTimer(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
-    http.PUT[JsValue, HttpResponse](putUrl, knownFacts) map { response =>
+    http.PUT[JsValue, HttpResponse](putUrl, knownFacts, Seq.empty) map { response =>
       timerContext.stop()
       auditAddKnownFacts(putUrl, serviceName, knownFacts, response)
       response.status match {

@@ -3,8 +3,8 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "business-customer"
 
-lazy val appDependencies : Seq[ModuleID] = AppSpecificDependencies()
-lazy val plugins : Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+lazy val appDependencies : Seq[ModuleID] = AppDependencies()
+lazy val plugins : Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
 
 lazy val scoverageSettings: Seq[Def.Setting[_]] = {
   import scoverage.ScoverageKeys
@@ -30,7 +30,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 2,
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    scalaVersion := "2.12.11",
+    scalaVersion := "2.12.12",
     routesGenerator := InjectedRoutesGenerator,
     Keys.fork                  in IntegrationTest :=  false,
     unmanagedSourceDirectories in IntegrationTest :=  (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
@@ -40,5 +40,4 @@ lazy val microservice = Project(appName, file("."))
     resolvers += Resolver.typesafeRepo("releases"),
     resolvers += Resolver.jcenterRepo
   )
-  .enablePlugins(SbtDistributablesPlugin, SbtAutoBuildPlugin, SbtGitVersioning)
   .disablePlugins(JUnitXmlReportPlugin)
