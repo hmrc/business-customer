@@ -1,7 +1,13 @@
 
 package helpers.application
 
-import connectors.{DefaultEtmpConnector, DefaultGovernmentGatewayAdminConnector, DefaultTaxEnrolmentsConnector, EtmpConnector, GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
+import connectors.{
+  DefaultEtmpConnector,
+  DefaultGovernmentGatewayAdminConnector,
+  DefaultTaxEnrolmentsConnector,
+  EtmpConnector,
+  GovernmentGatewayAdminConnector,
+  TaxEnrolmentsConnector}
 import helpers.wiremock.WireMockConfig
 import metrics.{DefaultServiceMetrics, ServiceMetrics}
 import org.scalatest.TestSuite
