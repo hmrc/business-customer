@@ -22,18 +22,19 @@ import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class DefaultAddKnownFactsController @Inject()(
                                                 cc: ControllerComponents,
                                                 val ggAdminConnector: GovernmentGatewayAdminConnector,
                                                 val taxEnrolmentConnector: TaxEnrolmentsConnector
-                                              ) extends BackendController(cc) with AddKnownFactsController {
+                                              )(implicit val ec: ExecutionContext) extends BackendController(cc) with AddKnownFactsController {
 }
 
 trait AddKnownFactsController extends BackendController with Logging {
 
+  implicit val ec: ExecutionContext
   def ggAdminConnector: GovernmentGatewayAdminConnector
   def taxEnrolmentConnector: TaxEnrolmentsConnector
 

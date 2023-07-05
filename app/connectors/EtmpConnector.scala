@@ -27,13 +27,12 @@ import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
                                      val http: HttpClient,
                                      val auditConnector: AuditConnector,
-                                     val metrics: ServiceMetrics) extends EtmpConnector {
+                                     val metrics: ServiceMetrics)(implicit val ec: ExecutionContext) extends EtmpConnector {
   val serviceUrl: String = servicesConfig.baseUrl("etmp-hod")
   val registerUri = "/registration/organisation"
   val updateRegistrationDetailsUri = "/registration/safeid"
@@ -43,6 +42,7 @@ class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
 
 trait EtmpConnector extends RawResponseReads with Auditable with Logging {
 
+  implicit val ec: ExecutionContext
   def serviceUrl: String
   def registerUri: String
   def urlHeaderEnvironment: String

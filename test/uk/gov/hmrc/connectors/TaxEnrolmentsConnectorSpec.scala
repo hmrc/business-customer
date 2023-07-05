@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 
 import java.util.UUID
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TaxEnrolmentsConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
 
@@ -41,6 +41,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with GuiceOneServerPerSuite wi
 
   trait Setup {
     class TestTaxEnrolmentsConnector extends TaxEnrolmentsConnector {
+      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
       override val serviceUrl = ""
       override val emacBaseUrl = ""
       override val http: CorePut = mockWSHttp

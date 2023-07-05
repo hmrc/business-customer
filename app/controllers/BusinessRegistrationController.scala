@@ -21,27 +21,29 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class DefaultBusinessRegistrationController @Inject()(
                                                       cc: ControllerComponents,
                                                       val desConnector: EtmpConnector
-                                                     ) extends BackendController(cc) with BusinessRegistrationController
+                                                     )(implicit val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
 
 @Singleton
 class SaBusinessRegistrationController @Inject()(
                                                   cc: ControllerComponents,
                                                   val desConnector: EtmpConnector
-                                                ) extends BackendController(cc) with BusinessRegistrationController
+                                                )(implicit val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
 
 @Singleton
 class AgentBusinessRegistrationController @Inject()(
                                                      cc: ControllerComponents,
                                                      val desConnector: EtmpConnector
-                                                   ) extends BackendController(cc) with BusinessRegistrationController
+                                                   )(implicit val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
 
 trait BusinessRegistrationController extends BackendController {
+
+  implicit val ec: ExecutionContext
   def desConnector: EtmpConnector
 
   def register(id: String): Action[AnyContent] = Action.async {

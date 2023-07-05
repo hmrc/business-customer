@@ -18,10 +18,10 @@ object AppDependencies extends TestDependencies {
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"                   %% "bootstrap-test-play-28"     % "7.19.0"            % scope,
     "com.typesafe.play"             %% "play-test"                  % PlayVersion.current % scope,
-    "org.mockito"                   %  "mockito-core"               % "5.3.1"             % scope,
+    "org.mockito"                   %  "mockito-core"               % "5.4.0"             % scope,
     "org.scalatestplus"             %% "scalatestplus-mockito"      % "1.0.0-M2"          % scope,
     "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.15.2"            % scope,
-    "com.github.tomakehurst"        %  "wiremock-jre8"              % "2.33.2"            % IntegrationTest withSources()
+    "com.github.tomakehurst"        %  "wiremock-jre8"              % "2.35.0"            % IntegrationTest withSources()
   )
 
   def apply() = compile ++ test
