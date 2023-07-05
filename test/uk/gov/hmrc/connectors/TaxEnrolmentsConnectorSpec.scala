@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with GuiceOneServerPerSuite wi
     val connector = new TestTaxEnrolmentsConnector()
   }
 
-  override def beforeEach = {
+  override def beforeEach(): Unit = {
     reset(mockWSHttp)
   }
 
@@ -61,22 +61,22 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with GuiceOneServerPerSuite wi
     val failureJson = Json.parse( """{"error":"Constraint error"}""")
 
     "for successful set of known facts, return response" in new Setup {
-      implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      implicit val hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())).
         thenReturn(Future.successful(HttpResponse(NO_CONTENT, successfulJson.toString)))
 
-      val knownFacts = Json.toJson("")
-      val result = connector.addKnownFacts("ATED", knownFacts, "JARN123456")
+      val knownFacts: JsValue = Json.toJson("")
+      val result: Future[HttpResponse] = connector.addKnownFacts("ATED", knownFacts, "JARN123456")
       await(result).status must be(NO_CONTENT)
     }
 
     "for unsuccessful call of known facts, return response" in new Setup {
-      implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      implicit val hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())).
         thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, failureJson.toString)))
 
-      val knownFacts = Json.toJson("")
-      val result = connector.addKnownFacts("ATED", knownFacts, "JARN123456")
+      val knownFacts: JsValue = Json.toJson("")
+      val result: Future[HttpResponse] = connector.addKnownFacts("ATED", knownFacts, "JARN123456")
       await(result).status must be(INTERNAL_SERVER_ERROR)
     }
 

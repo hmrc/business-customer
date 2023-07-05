@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
       """.stripMargin)
 
     "for a successful registration, return registration response" in new Setup {
-      val inputJsonForNUK = Json.parse(
+      val inputJsonForNUK: JsValue = Json.parse(
         """
           |{
           |  "businessName": "ACME",
@@ -91,12 +91,12 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
       when(mockWSHttp.POST[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())) thenReturn {
         Future.successful(HttpResponse(OK, successResponse.toString))
       }
-      val result = connector.register(inputJsonForNUK)
+      val result: Future[HttpResponse] = connector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
     }
 
     "for a failed registration, return registration response" in new Setup {
-      val inputJsonForNUK = Json.parse(
+      val inputJsonForNUK: JsValue = Json.parse(
         """
           |{
           |  "businessName": "ACME",
@@ -113,7 +113,7 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
       when(mockWSHttp.POST[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())) thenReturn {
         Future.successful(HttpResponse(BAD_REQUEST, successResponse.toString))
       }
-      val result = connector.register(inputJsonForNUK)
+      val result: Future[HttpResponse] = connector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
     }
 
@@ -134,25 +134,25 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
 
 
       "Correctly submit data if with a valid response" in new Setup {
-        val successResponse = Json.parse( """{"processingDate": "2001-12-17T09:30:47Z"}""")
+        val successResponse: JsValue = Json.parse( """{"processingDate": "2001-12-17T09:30:47Z"}""")
 
         when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, successResponse.toString)))
 
-        val result = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
-        val response = await(result)
+        val result: Future[HttpResponse] = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
+        val response: HttpResponse = await(result)
         response.status must be(OK)
         response.json must be(successResponse)
       }
 
       "submit data  with an invalid response" in new Setup {
-        val notFoundResponse = Json.parse( """{}""")
+        val notFoundResponse: JsValue = Json.parse( """{}""")
 
         when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(HttpResponse(NOT_FOUND, notFoundResponse.toString)))
 
-        val result = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
-        val response = await(result)
+        val result: Future[HttpResponse] = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
+        val response: HttpResponse = await(result)
         response.status must be(NOT_FOUND)
       }
     }

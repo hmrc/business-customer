@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with GuiceOneServerPe
     val connector = new TestGGAdminConnector()
   }
 
-  override def beforeEach = {
+  override def beforeEach(): Unit = {
     reset(mockWSHttp)
   }
 
@@ -62,24 +62,24 @@ class GovernmentGatewayAdminConnectorSpec extends PlaySpec with GuiceOneServerPe
     val failureJson = Json.parse( """{"error":"Constraint error"}""")
 
     "for successful set of known facts, return response" in new Setup {
-      implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      implicit val hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(),
         ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).
         thenReturn(Future.successful(HttpResponse(OK, successfulJson.toString)))
 
-      val knownFacts = Json.toJson("")
-      val result = connector.addKnownFacts("ATED", knownFacts)
+      val knownFacts: JsValue = Json.toJson("")
+      val result: Future[HttpResponse] = connector.addKnownFacts("ATED", knownFacts)
       await(result).status must be(OK)
     }
 
     "for unsuccessful call of known facts, return response" in new Setup {
-      implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      implicit val hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(mockWSHttp.POST[JsValue, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(),
         ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).
         thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, failureJson.toString)))
 
-      val knownFacts = Json.toJson("")
-      val result = connector.addKnownFacts("ATED", knownFacts)
+      val knownFacts: JsValue = Json.toJson("")
+      val result: Future[HttpResponse] = connector.addKnownFacts("ATED", knownFacts)
       await(result).status must be(INTERNAL_SERVER_ERROR)
     }
 

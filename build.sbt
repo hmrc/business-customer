@@ -1,5 +1,4 @@
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "business-customer"
 
@@ -20,21 +19,20 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins : _*)
   .configs(IntegrationTest)
   .settings(
-    Compile / scalacOptions += "-P:silencer:pathFilters=target/.*",
     addTestReportOption(IntegrationTest, "int-test-reports"),
     inConfig(IntegrationTest)(Defaults.itSettings),
     scoverageSettings,
     scalaSettings,
-    publishingSettings,
     defaultSettings(),
     majorVersion := 2,
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    scalaVersion := "2.12.13",
+    scalaVersion := "2.13.8",
     routesGenerator := InjectedRoutesGenerator,
-    Keys.fork                  in IntegrationTest :=  false,
-    unmanagedSourceDirectories in IntegrationTest :=  (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
-    parallelExecution in IntegrationTest := false
+    scalacOptions += "-Wconf:src=routes/.*:s",
+    IntegrationTest / Keys.fork :=  false,
+    IntegrationTest / unmanagedSourceDirectories :=  (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
+    IntegrationTest / parallelExecution := false
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases"),
