@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +21,29 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class DefaultUpdateBusinessRegistrationController @Inject()(
                                                              cc: ControllerComponents,
                                                              val desConnector: EtmpConnector
-                                                           ) extends BackendController(cc) with UpdateBusinessRegistrationController
+                                                           )(implicit val ec: ExecutionContext) extends BackendController(cc) with UpdateBusinessRegistrationController
 
 @Singleton
 class SaUpdateBusinessRegistrationController @Inject()(
                                                         cc: ControllerComponents,
                                                         val desConnector: EtmpConnector
-                                                      ) extends BackendController(cc) with UpdateBusinessRegistrationController
+                                                      )(implicit val ec: ExecutionContext) extends BackendController(cc) with UpdateBusinessRegistrationController
 
 @Singleton
 class AgentUpdateBusinessRegistrationController @Inject()(
                                                            cc: ControllerComponents,
                                                            val desConnector: EtmpConnector
-                                                         )extends BackendController(cc) with UpdateBusinessRegistrationController
+                                                         )(implicit val ec: ExecutionContext)extends BackendController(cc) with UpdateBusinessRegistrationController
 
 trait UpdateBusinessRegistrationController extends BackendController {
 
+  implicit val ec: ExecutionContext
   def desConnector: EtmpConnector
 
   def update(utr: String, safeId: String): Action[AnyContent] = Action.async {

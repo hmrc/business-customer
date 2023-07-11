@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,20 @@ import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultTaxEnrolmentsConnector @Inject()(val servicesConfig: ServicesConfig,
                                               val metrics: ServiceMetrics,
                                               val http: HttpClient,
-                                              val auditConnector: AuditConnector) extends TaxEnrolmentsConnector {
-  val serviceUrl = servicesConfig.baseUrl("tax-enrolments")
+                                              val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends TaxEnrolmentsConnector {
+  val serviceUrl: String = servicesConfig.baseUrl("tax-enrolments")
   val emacBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
   val audit: Audit = new Audit("business-customer", auditConnector)
 }
 
 trait TaxEnrolmentsConnector extends RawResponseReads with Auditable with Logging {
 
+  implicit val ec: ExecutionContext
   def serviceUrl: String
   def emacBaseUrl: String
   def metrics: ServiceMetrics
