@@ -27,7 +27,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 2,
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    scalaVersion := "2.13.8",
+    scalaVersion := "2.13.12",
     routesGenerator := InjectedRoutesGenerator,
     scalacOptions += "-Wconf:src=routes/.*:s",
     IntegrationTest / Keys.fork :=  false,

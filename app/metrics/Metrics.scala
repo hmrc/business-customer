@@ -16,31 +16,30 @@
 
 package metrics
 
-import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.{Counter, MetricRegistry, Timer}
 import com.codahale.metrics.Timer.Context
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.Inject
 import metrics.MetricsEnum.MetricsEnum
 
-class DefaultServiceMetrics @Inject()(val metrics: Metrics) extends ServiceMetrics
+import javax.inject.Inject
+
+class DefaultServiceMetrics @Inject()(val metrics: MetricRegistry) extends ServiceMetrics
 trait ServiceMetrics {
-  val metrics: Metrics
-  val registry: MetricRegistry = metrics.defaultRegistry
-  val timers = Map(
+  val registry: MetricRegistry = new MetricRegistry
+  val timers: Map[metrics.MetricsEnum.Value, Timer] = Map(
     MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.timer("gga-add-known-facts-agent-response-timer"),
     MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS -> registry.timer("emac-add-known-facts-agent-response-timer"),
     MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> registry.timer("etmp-create-business-partner-response-timer"),
     MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> registry.timer("etmp-update-registration-details-response-timer")
   )
 
-  val successCounters = Map(
+  val successCounters: Map[metrics.MetricsEnum.Value, Counter] = Map(
     MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.counter("gga-add-known-facts-agent-success-counter"),
     MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS -> registry.counter("emac-add-known-facts-agent-success-counter"),
     MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> registry.counter("etmp-create-business-partner-success-counter"),
     MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS -> registry.counter("etmp-update-registration-details-success-counter")
   )
 
-  val failedCounters = Map(
+  val failedCounters: Map[metrics.MetricsEnum.Value, Counter] = Map(
     MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.counter("gga-add-known-facts-agent-failed-counter"),
     MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS -> registry.counter("emac-add-known-facts-agent-failed-counter"),
     MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER -> registry.counter("etmp-create-business-partner-failed-counter"),
