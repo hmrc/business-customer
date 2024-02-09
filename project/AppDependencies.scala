@@ -1,4 +1,3 @@
-import play.core.PlayVersion
 import sbt._
 
 trait TestDependencies {
@@ -18,15 +17,17 @@ object AppDependencies extends TestDependencies {
   )
   
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"                  %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope,
-//    "com.typesafe.play"             %% "play-test"                  % PlayVersion.current % scope,
-    "org.mockito"                  %  "mockito-core"           % "5.10.0"             % scope,
-    "org.scalatestplus"            %% "scalatestplus-mockito"  % "1.0.0-M2"           % scope,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala"   % "2.16.1"             % scope,
-    "org.wiremock"                 %  "wiremock"               % "3.3.1"              % IntegrationTest withSources()
+    "uk.gov.hmrc"                  %% "bootstrap-test-play-30" % bootstrapPlayVersion % "test",
+    "org.mockito"                  %  "mockito-core"           % "5.10.0"             % "test",
+    "org.scalatestplus"            %% "scalatestplus-mockito"  % "1.0.0-M2"           % "test",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala"   % "2.16.1"             % "test"
   )
 
-  def apply() = compile ++ test
+  val itDependencies: Seq[ModuleID] = Seq(
+    "org.wiremock" % "wiremock" % "3.3.1" % Test
+  )
+
+  def apply(): Seq[sbt.ModuleID] = compile ++ test
 }
 
 
