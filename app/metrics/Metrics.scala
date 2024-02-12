@@ -22,9 +22,9 @@ import metrics.MetricsEnum.MetricsEnum
 
 import javax.inject.Inject
 
-class DefaultServiceMetrics @Inject()(val metrics: MetricRegistry) extends ServiceMetrics
+class DefaultServiceMetrics @Inject()(val registry: MetricRegistry) extends ServiceMetrics
 trait ServiceMetrics {
-  val registry: MetricRegistry = new MetricRegistry
+  val registry: MetricRegistry
   val timers: Map[metrics.MetricsEnum.Value, Timer] = Map(
     MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS -> registry.timer("gga-add-known-facts-agent-response-timer"),
     MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS -> registry.timer("emac-add-known-facts-agent-response-timer"),
