@@ -21,10 +21,6 @@
         </encoder>
     </appender>
 
-    <logger name="com.ning.http.client" level="WARN"/>
-    <logger name="org.asynchttpclient.netty.channel.DefaultChannelPool" level="WARN"/>
-    <logger name="org.asynchttpclient.netty" level="INFO"/>
-
     <logger name="org.apache.http.wire" level="INFO"/>
     <logger name="org.apache.http.headers" level="INFO"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
@@ -32,8 +28,6 @@
     <logger name="uk.gov" level="INFO"/>
 
     <logger name="com.codahale.metrics.graphite.GraphiteReporter" level="OFF" />
-    <logger name="play.core.netty.utils.ServerCookieDecoder" level="INFO" />
-    <logger name="io.netty.util.internal" level="INFO" />
     <logger name="org.apache.pekko.stream" level="INFO" />
 
     <logger name="com.google.inject" level="INFO"/>
