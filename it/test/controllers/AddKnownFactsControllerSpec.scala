@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.controllers
+package controllers
 
 import connectors.{GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
-import controllers.AddKnownFactsController
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
@@ -63,14 +62,16 @@ class AddKnownFactsControllerSpec extends PlaySpec with GuiceOneServerPerSuite w
 
       "respond with OK for successful add known fact" in new Setup {
         val inputJson: JsValue = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
-        when(mockGGAdminConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(ggSuccessResponse))
+        when(mockGGAdminConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(ggSuccessResponse))
         val result: Future[Result] = controller.addKnownFacts(utr, "ATED").apply(FakeRequest().withJsonBody(inputJson))
         status(result) must be(NO_CONTENT)
       }
 
       "for an unsuccessful add known fact call, still return status as OK" in new Setup {
         val inputJson: JsValue = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
-        when(mockGGAdminConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(ggFailureResponse))
+        when(mockGGAdminConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(ggFailureResponse))
         val result: Future[Result] = controller.addKnownFacts(utr, "ATED").apply(FakeRequest().withJsonBody(inputJson))
         status(result) must be(OK)
       }
@@ -84,14 +85,16 @@ class AddKnownFactsControllerSpec extends PlaySpec with GuiceOneServerPerSuite w
 
       "respond with OK for successful add known fact" in new Setup {
         val inputJson: JsValue = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
-        when(mockTaxEnrolmentConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(ggSuccessResponse))
+        when(mockTaxEnrolmentConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(ggSuccessResponse))
         val result: Future[Result] = controller.newAddKnownFacts(utr, "ATED", "JARN123456").apply(FakeRequest().withJsonBody(inputJson))
         status(result) must be(NO_CONTENT)
       }
 
       "for an unsuccessful add known fact call, still return status as OK" in new Setup {
         val inputJson: JsValue = Json.parse(s"""{"serviceName": "$serviceName", "utr": "$utr"}""")
-        when(mockTaxEnrolmentConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(ggFailureResponse))
+        when(mockTaxEnrolmentConnector.addKnownFacts(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(ggFailureResponse))
         val result: Future[Result] = controller.newAddKnownFacts(utr, "ATED", "JARN123456").apply(FakeRequest().withJsonBody(inputJson))
         status(result) must be(OK)
       }

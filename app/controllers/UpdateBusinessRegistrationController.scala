@@ -59,5 +59,4 @@ trait UpdateBusinessRegistrationController extends BackendController {
         }
       }
   }
-
 }
