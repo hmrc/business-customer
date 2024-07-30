@@ -73,7 +73,7 @@ trait EtmpConnector extends Auditable with Logging {
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
     val postUrl= s"$serviceUrl$registerUri"
     http.post(url"$postUrl")
-      .withBody(Json.toJson(registerData)).setHeader(createHeaders: _*)
+      .withBody(registerData).setHeader(createHeaders: _*)
       .execute[HttpResponse] map {
       response =>
           timerContext.stop()
@@ -111,7 +111,7 @@ trait EtmpConnector extends Auditable with Logging {
     val putUrl = s"""$serviceUrl$updateRegistrationDetailsUri/$safeId"""
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
     http.put(url"$putUrl")
-      .withBody(Json.toJson(updatedData)).setHeader(createHeaders: _*)
+      .withBody(updatedData).setHeader(createHeaders: _*)
       .execute[HttpResponse] map {
       response =>
       timerContext.stop()
