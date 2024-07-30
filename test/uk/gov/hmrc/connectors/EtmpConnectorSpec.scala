@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package connectors
+package uk.gov.hmrc.connectors
 
+import connectors.{DefaultEtmpConnector, EtmpConnector}
 import metrics.ServiceMetrics
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach

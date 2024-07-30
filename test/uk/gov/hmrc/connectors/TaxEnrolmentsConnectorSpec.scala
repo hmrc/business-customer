@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package connectors
+package uk.gov.hmrc.connectors
 
+import connectors.{DefaultTaxEnrolmentsConnector, TaxEnrolmentsConnector}
 import metrics.ServiceMetrics
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach

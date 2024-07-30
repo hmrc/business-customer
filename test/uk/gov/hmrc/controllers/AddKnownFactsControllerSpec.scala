@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.controllers
 
 import connectors.{GovernmentGatewayAdminConnector, TaxEnrolmentsConnector}
+import controllers.AddKnownFactsController
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
