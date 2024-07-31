@@ -22,7 +22,7 @@ import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EtmpConnectorSpec extends PlaySpec with ConnectorTest with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterEach{
+class EtmpConnectorSpec extends PlaySpec with ConnectorTest with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfterEach{
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val metrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
   val auditConnector: AuditConnector = app.injector.instanceOf[AuditConnector]
