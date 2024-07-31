@@ -19,9 +19,10 @@ import connectors._
 import metrics.{DefaultServiceMetrics, ServiceMetrics}
 import org.scalatest.TestSuite
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{bind => playBind}
 import play.api.libs.ws.{WSClient, WSRequest}
-import play.api.{Application, inject}
 import uk.gov.hmrc.http.test.WireMockSupport
 
 trait IntegrationApplication extends GuiceOneServerPerSuite with WireMockSupport {
@@ -33,10 +34,10 @@ trait IntegrationApplication extends GuiceOneServerPerSuite with WireMockSupport
   lazy val ws: WSClient = app.injector.instanceOf[WSClient]
 
   override lazy val app: Application = new GuiceApplicationBuilder()
-    .overrides(inject.bind(classOf[EtmpConnector]).to(classOf[DefaultEtmpConnector]))
-    .overrides(inject.bind(classOf[GovernmentGatewayAdminConnector]).to(classOf[DefaultGovernmentGatewayAdminConnector]))
-    .overrides(inject.bind(classOf[TaxEnrolmentsConnector]).to(classOf[DefaultTaxEnrolmentsConnector]))
-    .overrides(inject.bind(classOf[ServiceMetrics]).to(classOf[DefaultServiceMetrics]))
+    .overrides(playBind[EtmpConnector].to[DefaultEtmpConnector])
+    .overrides(playBind[GovernmentGatewayAdminConnector].to[DefaultGovernmentGatewayAdminConnector])
+    .overrides(playBind[TaxEnrolmentsConnector].to[DefaultTaxEnrolmentsConnector])
+    .overrides(playBind[ServiceMetrics].to[DefaultServiceMetrics])
     .configure(
       Map(
         "play.http.router" -> "testOnlyDoNotUseInAppConf.Routes",

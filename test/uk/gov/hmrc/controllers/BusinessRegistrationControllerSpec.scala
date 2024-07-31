@@ -75,8 +75,21 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
           Json.parse(
           """{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
               |"organisation":{"organisationName":"ACME"},
-              |"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},
-              |"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
+              |  "address":{
+              |    "addressLine1":"111",
+              |    "addressLine2":"ABC Street",
+              |    "addressLine3":"ABC city",
+              |    "addressLine4":"ABC 123",
+              |    "countryCode":"UK"
+              |  },
+              |  "isAnAgent":false,
+              |  "isAGroup":false,
+              |  "nonUKIdentification":{
+              |    "idNumber":"id1",
+              |    "issuingInstitution":"HMRC",
+              |    "issuingCountryCode":"UK"
+              |    }
+              }"""
             .stripMargin)
         when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
         val result: Future[Result] = controller.register(utr).apply(FakeRequest().withJsonBody(inputJsonForNUK))
@@ -87,8 +100,21 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
         val inputJsonForNUK: JsValue = Json.parse(
         """{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
             |"organisation":{"organisationName":"ACME"},
-            |"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},
-            |"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |    }
+            |}"""
           .stripMargin)
         when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
         val result: Future[Result] = controller.register(utr).apply(FakeRequest().withJsonBody(inputJsonForNUK))
@@ -112,8 +138,21 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
         val inputJsonForNUK: JsValue = Json.parse(
         """{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
             |"organisation":{"organisationName":"ACME"},
-            |"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},
-            |"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |    }
+            |}"""
           .stripMargin)
         val badRequestJson: JsValue = Json.parse("""{"reason" : "Bad Request"}""")
         when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -133,8 +172,21 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
         val inputJsonForNUK: JsValue = Json.parse(
         """{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
             |"organisation":{"organisationName":"ACME"},
-            |"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},
-            |"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |    }
+            |}"""
           .stripMargin)
         val serviceUnavailable: JsValue = Json.parse("""{"reason" : "Service unavailable"}""")
         when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -155,8 +207,21 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
         val inputJsonForNUK: JsValue = Json.parse(
         """{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
             |"organisation":{"organisationName":"ACME"},
-            |"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},
-            |"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |    }
+            |}"""
           .stripMargin)
         val serverError: JsValue = Json.parse("""{"reason" : "Internal server error"}""")
         when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any()))
