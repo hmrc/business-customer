@@ -17,6 +17,7 @@
 package connectors
 
 import audit.Auditable
+
 import javax.inject.Inject
 import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
@@ -26,31 +27,31 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
-
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultGovernmentGatewayAdminConnector @Inject()(val servicesConfig: ServicesConfig,
                                                        val metrics: ServiceMetrics,
-                                                       val http: HttpClient,
+                                                       val http: HttpClientV2,
                                                        val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends GovernmentGatewayAdminConnector {
   val serviceUrl: String = servicesConfig.baseUrl("government-gateway-admin")
   val ggaBaseUrl = s"$serviceUrl/government-gateway-admin/service"
   val audit: Audit = new Audit("business-customer", auditConnector)
 }
 
-trait GovernmentGatewayAdminConnector extends RawResponseReads with Auditable with Logging {
+trait GovernmentGatewayAdminConnector extends Auditable with Logging {
 
   implicit val ec: ExecutionContext
   def serviceUrl: String
   def ggaBaseUrl: String
   def metrics: ServiceMetrics
-  def http: HttpClient
+  def http: HttpClientV2
 
   def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val postUrl = s"$ggaBaseUrl/$serviceName/known-facts"
     val timerContext = metrics.startTimer(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
-    http.POST[JsValue, HttpResponse](postUrl, knownFacts, Seq.empty) map { response =>
+    http.post(url"$postUrl").withBody(knownFacts).execute[HttpResponse].map{ response =>
       timerContext.stop()
       auditAddKnownFacts(serviceName, knownFacts, response)
       response.status match {

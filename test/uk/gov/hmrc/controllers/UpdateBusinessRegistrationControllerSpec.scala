@@ -51,7 +51,15 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with GuiceOneSer
   "UpdateBusinessRegistrationController" must {
 
     "updateRegistration" must {
-      val successResponse = Json.parse( """{"processingDate":"2015-12-17T09:30:47Z","sapNumber":"sapNumber","safeId":"XE000123456789","agentReferenceNumber":"01234567890"}""")
+      val successResponse = Json.parse(
+        """
+          |{
+          |  "processingDate":"2015-12-17T09:30:47Z",
+          |  "sapNumber":"sapNumber",
+          |  "safeId":"XE000123456789",
+          |  "agentReferenceNumber":"01234567890"
+          |}
+  """.stripMargin)
 
       val registerSuccessResponse = HttpResponse(OK, successResponse.toString)
       val matchFailure = Json.parse("""{"reason": "Resource not found"}""")
@@ -59,8 +67,31 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with GuiceOneSer
 
       val safeId = "XE000123456789"
       "respond with OK" in new Setup {
-        val inputJsonForNUK: JsValue = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
-        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
+        val inputJsonForNUK: JsValue = Json.parse(
+          """
+            |{
+            |  "acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
+            |  "organisation":{"organisationName":"ACME"},
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |  }
+            |}
+  """.stripMargin)
+
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(registerSuccessResponse))
+
         val result: Future[Result] = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(OK)
         contentType(result).get must be("text/plain")
@@ -68,40 +99,146 @@ class UpdateBusinessRegistrationControllerSpec extends PlaySpec with GuiceOneSer
       }
 
       "for an unsuccessful match return Not found" in new Setup {
-        val inputJsonForNUK: JsValue = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
-        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(matchFailureResponse))
+        val inputJsonForNUK: JsValue = Json.parse(
+          """
+            |{
+            |  "acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
+            |  "organisation":{"organisationName":"ACME"},
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |  }
+            |}
+  """.stripMargin)
+
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(matchFailureResponse))
+
         val result: Future[Result] = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(NOT_FOUND)
         contentAsJson(result) must be(matchFailureResponse.json)
       }
 
       "for a bad request, return BadRequest" in new Setup {
-        val inputJsonForNUK: JsValue = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
+        val inputJsonForNUK: JsValue = Json.parse(
+          """
+            |{
+            |  "acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
+            |  "organisation":{"organisationName":"ACME"},
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |  }
+            |}
+  """.stripMargin)
+
         val badRequestJson: JsValue = Json.parse("""{"reason" : "Bad Request"}""")
-        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(BAD_REQUEST, badRequestJson.toString)))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(
+            Future.successful(
+              HttpResponse(
+                BAD_REQUEST,
+                badRequestJson.toString
+              )
+            )
+          )
         val result: Future[Result] = controller.update(utr, safeId)(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) must be(badRequestJson)
       }
 
       "for service unavailable, return service unavailable" in new Setup {
-        val inputJsonForNUK: JsValue = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
+        val inputJsonForNUK: JsValue = Json.parse(
+          """
+            |{
+            |  "acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
+            |  "organisation":{"organisationName":"ACME"},
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |  }
+            |}
+  """.stripMargin)
+
         val serviceUnavailable: JsValue = Json.parse("""{"reason" : "Service unavailable"}""")
-        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE, serviceUnavailable.toString)))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(
+            Future.successful(HttpResponse(
+              SERVICE_UNAVAILABLE,
+              serviceUnavailable.toString)
+            )
+          )
         val result: Future[Result] = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(SERVICE_UNAVAILABLE)
         contentAsJson(result) must be(serviceUnavailable)
       }
 
       "internal server error, return internal server error" in new Setup {
-        val inputJsonForNUK: JsValue = Json.parse("""{"acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a","organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}""")
+        val inputJsonForNUK: JsValue = Json.parse(
+          """
+            |{
+            |  "acknowledgementReference":"session-ea091388-d834-4b34-8b8a-caa396e2636a",
+            |  "organisation":{"organisationName":"ACME"},
+            |  "address":{
+            |    "addressLine1":"111",
+            |    "addressLine2":"ABC Street",
+            |    "addressLine3":"ABC city",
+            |    "addressLine4":"ABC 123",
+            |    "countryCode":"UK"
+            |  },
+            |  "isAnAgent":false,
+            |  "isAGroup":false,
+            |  "nonUKIdentification":{
+            |    "idNumber":"id1",
+            |    "issuingInstitution":"HMRC",
+            |    "issuingCountryCode":"UK"
+            |  }
+            |}
+  """.stripMargin)
+
         val serverError: JsValue = Json.parse("""{"reason" : "Internal server error"}""")
-        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, serverError.toString)))
+        when(mockDesConnector.updateRegistrationDetails(ArgumentMatchers.eq(safeId), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(
+            Future.successful(
+              HttpResponse(
+                INTERNAL_SERVER_ERROR,
+                serverError.toString)
+            )
+          )
         val result: Future[Result] = controller.update(utr, safeId).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(INTERNAL_SERVER_ERROR)
         contentAsJson(result) must be(serverError)
       }
     }
   }
-
 }

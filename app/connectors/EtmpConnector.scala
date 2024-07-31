@@ -21,16 +21,17 @@ import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
-                                     val http: HttpClient,
+                                     val http: HttpClientV2,
                                      val auditConnector: AuditConnector,
                                      val metrics: ServiceMetrics)(implicit val ec: ExecutionContext) extends EtmpConnector {
   val serviceUrl: String = servicesConfig.baseUrl("etmp-hod")
@@ -40,7 +41,7 @@ class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
   val urlHeaderAuthorization: String = s"Bearer ${servicesConfig.getConfString("etmp-hod.authorization-token", "")}"
 }
 
-trait EtmpConnector extends RawResponseReads with Auditable with Logging {
+trait EtmpConnector extends Auditable with Logging {
 
   implicit val ec: ExecutionContext
   def serviceUrl: String
@@ -51,7 +52,7 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
   def auditConnector: AuditConnector
 
   def metrics: ServiceMetrics
-  def http: HttpClient
+  def http: HttpClientV2
   def audit = new Audit("business-customer", auditConnector)
 
   def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -70,19 +71,23 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
     }
 
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-    http.POST(s"$serviceUrl$registerUri", registerData, createHeaders).map { response =>
-      timerContext.stop()
-      auditRegister(registerData, response)
-      response.status match {
-        case OK =>
-          metrics.incrementSuccessCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-          response
-        case status =>
-          metrics.incrementFailedCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
-          logger.warn(s"[ETMPConnector][register] - status: $status")
-          doFailedAudit("registerFailed", registerData.toString, response.body)
-          response
-      }
+    val postUrl= s"$serviceUrl$registerUri"
+    http.post(url"$postUrl")
+      .withBody(registerData).setHeader(createHeaders: _*)
+      .execute[HttpResponse] map {
+      response =>
+          timerContext.stop()
+          auditRegister(registerData, response)
+          response.status match {
+            case OK =>
+              metrics.incrementSuccessCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
+              response
+            case status =>
+              metrics.incrementFailedCounter(MetricsEnum.ETMP_REGISTER_BUSINESS_PARTNER)
+              logger.warn(s"[ETMPConnector][register] - status: $status")
+              doFailedAudit("registerFailed", registerData.toString, response.body)
+              response
+          }
     }
   }
 
@@ -105,7 +110,10 @@ trait EtmpConnector extends RawResponseReads with Auditable with Logging {
 
     val putUrl = s"""$serviceUrl$updateRegistrationDetailsUri/$safeId"""
     val timerContext = metrics.startTimer(MetricsEnum.ETMP_UPDATE_REGISTRATION_DETAILS)
-    http.PUT(putUrl, updatedData, createHeaders).map { response =>
+    http.put(url"$putUrl")
+      .withBody(updatedData).setHeader(createHeaders: _*)
+      .execute[HttpResponse] map {
+      response =>
       timerContext.stop()
       auditUpdateRegistrationDetails(safeId, updatedData, response)
       response.status match {

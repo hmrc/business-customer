@@ -16,50 +16,32 @@
 
 package uk.gov.hmrc.connectors
 
-import connectors.EtmpConnector
+import connectors.{DefaultEtmpConnector, EtmpConnector}
 import metrics.ServiceMetrics
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfter
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
-import uk.gov.hmrc.audit.TestAudit
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.Audit
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfter {
-
-  val mockWSHttp: HttpClient = mock[HttpClient]
-  val mockServiceMetrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
-
+class EtmpConnectorSpec extends PlaySpec with ConnectorTest with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfterEach{
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  val metrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
+  val auditConnector: AuditConnector = app.injector.instanceOf[AuditConnector]
+  val servicesConfig: ServicesConfig = app.injector.instanceOf[ServicesConfig]
 
-  trait Setup {
-    class TestEtmpConnector extends EtmpConnector {
-      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-      override val serviceUrl = ""
-      override val registerUri = "/registration/organisation"
-      override val updateRegistrationDetailsUri = "/registration/safeid"
-      override val http: HttpClient = mockWSHttp
-      override val urlHeaderEnvironment: String = ""
-      override val urlHeaderAuthorization: String = ""
-      override def auditConnector: AuditConnector = app.injector.instanceOf[AuditConnector]
-      override val audit: Audit = new TestAudit(auditConnector)
-      override val metrics: ServiceMetrics = mockServiceMetrics
-    }
-
-    val connector = new TestEtmpConnector()
+  class Setup extends ConnectorTest {
+    val testEtmpConnector: EtmpConnector = new DefaultEtmpConnector(servicesConfig, mockHttpClient, auditConnector, metrics)
   }
 
-  before {
-    reset(mockWSHttp)
-  }
 
   "EtmpConnector" must {
 
@@ -89,10 +71,8 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
           |}
         """.stripMargin)
 
-      when(mockWSHttp.POST[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())) thenReturn {
-        Future.successful(HttpResponse(OK, successResponse.toString))
-      }
-      val result: Future[HttpResponse] = connector.register(inputJsonForNUK)
+      when(requestBuilderExecute[HttpResponse]).thenReturn(Future.successful(HttpResponse(OK, successResponse.toString)))
+      val result: Future[HttpResponse] = testEtmpConnector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
     }
 
@@ -111,10 +91,10 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
           |}
         """.stripMargin)
 
-      when(mockWSHttp.POST[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any())) thenReturn {
-        Future.successful(HttpResponse(BAD_REQUEST, successResponse.toString))
-      }
-      val result: Future[HttpResponse] = connector.register(inputJsonForNUK)
+      when(requestBuilderExecute[HttpResponse]).thenReturn(
+        Future.successful(HttpResponse(BAD_REQUEST, successResponse.toString)))
+
+      val result: Future[HttpResponse] = testEtmpConnector.register(inputJsonForNUK)
       await(result).json must be(successResponse)
     }
 
@@ -135,28 +115,24 @@ class EtmpConnectorSpec extends PlaySpec with GuiceOneServerPerSuite with Mockit
 
 
       "Correctly submit data if with a valid response" in new Setup {
-        val successResponse: JsValue = Json.parse( """{"processingDate": "2001-12-17T09:30:47Z"}""")
+        val successResponse: JsValue = Json.parse("""{"processingDate": "2001-12-17T09:30:47Z"}""")
 
-        when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(HttpResponse(OK, successResponse.toString)))
+        when(requestBuilderExecute[HttpResponse]).thenReturn(Future.successful(HttpResponse(OK, successResponse.toString)))
 
-        val result: Future[HttpResponse] = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
+        val result: Future[HttpResponse] = testEtmpConnector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
         val response: HttpResponse = await(result)
         response.status must be(OK)
         response.json must be(successResponse)
       }
 
       "submit data  with an invalid response" in new Setup {
-        val notFoundResponse: JsValue = Json.parse( """{}""")
+        val notFoundResponse: JsValue = Json.parse("""{}""")
+        when(requestBuilderExecute[HttpResponse]).thenReturn(Future.successful(HttpResponse(NOT_FOUND, notFoundResponse.toString)))
 
-        when(mockWSHttp.PUT[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(HttpResponse(NOT_FOUND, notFoundResponse.toString)))
-
-        val result: Future[HttpResponse] = connector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
+        val result: Future[HttpResponse] = testEtmpConnector.updateRegistrationDetails("SAFE-123", inputJsonForNUK)
         val response: HttpResponse = await(result)
         response.status must be(NOT_FOUND)
       }
     }
   }
-
 }

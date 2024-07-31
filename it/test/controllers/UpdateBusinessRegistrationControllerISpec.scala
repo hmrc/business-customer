@@ -20,6 +20,7 @@ import helpers.IntegrationSpec
 import play.api.libs.json.Json
 import play.api.libs.ws.WSResponse
 import com.github.tomakehurst.wiremock.client.WireMock._
+import play.api.http.Status.OK
 
 class UpdateBusinessRegistrationControllerISpec extends IntegrationSpec {
 
@@ -35,7 +36,7 @@ class UpdateBusinessRegistrationControllerISpec extends IntegrationSpec {
           stubFor(put(urlMatching(s"/registration/safeid/$userType"))
             .willReturn(
               aResponse()
-                .withStatus(200)
+                .withStatus(OK)
                 .withBody(
                   s"""{
                      |}""".stripMargin

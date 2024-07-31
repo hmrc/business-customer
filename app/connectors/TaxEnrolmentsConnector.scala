@@ -17,44 +17,45 @@
 package connectors
 
 import audit.Auditable
-import javax.inject.Inject
 import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultTaxEnrolmentsConnector @Inject()(val servicesConfig: ServicesConfig,
                                               val metrics: ServiceMetrics,
-                                              val http: HttpClient,
+                                              val http: HttpClientV2,
                                               val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends TaxEnrolmentsConnector {
   val serviceUrl: String = servicesConfig.baseUrl("tax-enrolments")
   val emacBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
   val audit: Audit = new Audit("business-customer", auditConnector)
 }
 
-trait TaxEnrolmentsConnector extends RawResponseReads with Auditable with Logging {
+trait TaxEnrolmentsConnector extends Auditable with Logging {
 
   implicit val ec: ExecutionContext
   def serviceUrl: String
   def emacBaseUrl: String
   def metrics: ServiceMetrics
-  def http: CorePut
+  def http: HttpClientV2
 
   def addKnownFacts(serviceName: String, knownFacts: JsValue, arn: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val agentRefIdentifier = "AgentRefNumber"
     val enrolmentKey = s"$serviceName~$agentRefIdentifier~$arn" // TODO: refactor to createEnrolmentKey method
     val putUrl = s"$emacBaseUrl/$enrolmentKey"
-
     val timerContext = metrics.startTimer(MetricsEnum.EMAC_ADMIN_ADD_KNOWN_FACTS)
-    http.PUT[JsValue, HttpResponse](putUrl, knownFacts, Seq.empty) map { response =>
+    http.put(url"$putUrl")
+      .withBody(knownFacts)
+      .execute[HttpResponse] map { response =>
       timerContext.stop()
       auditAddKnownFacts(putUrl, serviceName, knownFacts, response)
       response.status match {
