@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 trait TestDependencies {
   lazy val scope: String = "it,test"
@@ -13,7 +13,7 @@ object AppDependencies extends TestDependencies {
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
-    "uk.gov.hmrc" %% "domain-play-30"            % "10.0.0"
+    "uk.gov.hmrc" %% "domain-play-30"            % "11.0.0"
   )
   
   val test: Seq[ModuleID] = Seq(
