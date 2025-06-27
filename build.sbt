@@ -31,8 +31,7 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions += "-Wconf:src=routes/.*:s"
   )
   .settings(
-    resolvers += Resolver.typesafeRepo("releases"),
-    resolvers += Resolver.jcenterRepo
+    resolvers += Resolver.typesafeRepo("releases")
   )
   .disablePlugins(JUnitXmlReportPlugin)
 
