@@ -8,7 +8,7 @@ trait TestDependencies {
 object AppDependencies extends TestDependencies {
   import play.sbt.PlayImport.ws
 
-  private val bootstrapPlayVersion = "9.13.0"
+  private val bootstrapPlayVersion = "10.0.0"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
