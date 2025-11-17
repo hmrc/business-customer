@@ -4,7 +4,7 @@ import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 val appName = "business-customer"
 
 ThisBuild / majorVersion := 2
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "2.13.17"
 
 lazy val appDependencies : Seq[ModuleID] = AppDependencies()
 lazy val plugins : Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -40,3 +40,5 @@ lazy val it = project
   .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
   .settings(DefaultBuildSettings.itSettings())
   .settings(libraryDependencies ++= AppDependencies.itDependencies)
+
+addCommandAlias("runAllChecks", ";clean;compile;coverage;test;it/test;coverageReport")
