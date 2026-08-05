@@ -19,21 +19,22 @@ package connectors
 import audit.Auditable
 import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.{JsValue, Json}
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
                                      val http: HttpClientV2,
                                      val auditConnector: AuditConnector,
-                                     val metrics: ServiceMetrics)(implicit val ec: ExecutionContext) extends EtmpConnector {
+                                     val metrics: ServiceMetrics)(using val ec: ExecutionContext) extends EtmpConnector {
   val serviceUrl: String = servicesConfig.baseUrl("etmp-hod")
   val registerUri = "/registration/organisation"
   val updateRegistrationDetailsUri = "/registration/safeid"
@@ -43,7 +44,7 @@ class DefaultEtmpConnector @Inject()(val servicesConfig: ServicesConfig,
 
 trait EtmpConnector extends Auditable with Logging {
 
-  implicit val ec: ExecutionContext
+  given ec: ExecutionContext
   def serviceUrl: String
   def registerUri: String
   def urlHeaderEnvironment: String
@@ -55,7 +56,7 @@ trait EtmpConnector extends Auditable with Logging {
   def http: HttpClientV2
   def audit = new Audit("business-customer", auditConnector)
 
-  def register(registerData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def register(registerData: JsValue)(using hc: HeaderCarrier): Future[HttpResponse] = {
     def auditRegister(registerData: JsValue, response: HttpResponse): Unit = {
       val status = response.status match {
         case OK => EventTypes.Succeeded
@@ -91,7 +92,7 @@ trait EtmpConnector extends Auditable with Logging {
     }
   }
 
-  def updateRegistrationDetails(safeId: String, updatedData: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def updateRegistrationDetails(safeId: String, updatedData: JsValue)(using hc: HeaderCarrier): Future[HttpResponse] = {
     def auditUpdateRegistrationDetails(safeId: String,
                                                updateData: JsValue,
                                                response: HttpResponse): Unit =  {

@@ -4,7 +4,7 @@ import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 val appName = "business-customer"
 
 ThisBuild / majorVersion := 2
-ThisBuild / scalaVersion := "2.13.18"
+ThisBuild / scalaVersion := "3.3.7"
 
 lazy val appDependencies : Seq[ModuleID] = AppDependencies()
 lazy val plugins : Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -27,8 +27,14 @@ lazy val microservice = Project(appName, file("."))
     defaultSettings(),
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    routesGenerator := InjectedRoutesGenerator,
-    scalacOptions += "-Wconf:src=routes/.*:s"
+    routesGenerator := InjectedRoutesGenerator
+  )
+  .settings(
+    scalacOptions ++= Seq(
+      "-Wconf:src=target/.*:s",
+      "-Wconf:src=.*routes.*:s"
+    ),
+    scalacOptions ~= (_.distinct)
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases")

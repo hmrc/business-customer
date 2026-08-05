@@ -29,16 +29,16 @@ class DefaultAddKnownFactsController @Inject()(
                                                 cc: ControllerComponents,
                                                 val ggAdminConnector: GovernmentGatewayAdminConnector,
                                                 val taxEnrolmentConnector: TaxEnrolmentsConnector
-                                              )(implicit val ec: ExecutionContext) extends BackendController(cc) with AddKnownFactsController {
+                                              )(using val ec: ExecutionContext) extends BackendController(cc) with AddKnownFactsController {
 }
 
 trait AddKnownFactsController extends BackendController with Logging {
 
-  implicit val ec: ExecutionContext
+  given ec: ExecutionContext
   def ggAdminConnector: GovernmentGatewayAdminConnector
   def taxEnrolmentConnector: TaxEnrolmentsConnector
 
-  def newAddKnownFacts(id: String, serviceName: String, arn: String): Action[AnyContent] = Action.async {
+  def newAddKnownFacts(@annotation.unused id: String, serviceName: String, arn: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       taxEnrolmentConnector.addKnownFacts(serviceName, json, arn).map { addKnownFactResponse =>
@@ -52,7 +52,7 @@ trait AddKnownFactsController extends BackendController with Logging {
       }
   }
 
-  def addKnownFacts(id: String, serviceName: String): Action[AnyContent] = Action.async {
+  def addKnownFacts(@annotation.unused id: String, serviceName: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       ggAdminConnector.addKnownFacts(serviceName, json).map { addKnownFactResponse =>

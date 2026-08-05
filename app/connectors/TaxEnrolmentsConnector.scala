@@ -19,21 +19,22 @@ package connectors
 import audit.Auditable
 import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http._
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultTaxEnrolmentsConnector @Inject()(val servicesConfig: ServicesConfig,
                                               val metrics: ServiceMetrics,
                                               val http: HttpClientV2,
-                                              val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends TaxEnrolmentsConnector {
+                                              val auditConnector: AuditConnector)(using val ec: ExecutionContext) extends TaxEnrolmentsConnector {
   val serviceUrl: String = servicesConfig.baseUrl("tax-enrolments")
   val emacBaseUrl = s"$serviceUrl/tax-enrolments/enrolments"
   val audit: Audit = new Audit("business-customer", auditConnector)
@@ -41,13 +42,13 @@ class DefaultTaxEnrolmentsConnector @Inject()(val servicesConfig: ServicesConfig
 
 trait TaxEnrolmentsConnector extends Auditable with Logging {
 
-  implicit val ec: ExecutionContext
+  given ec: ExecutionContext
   def serviceUrl: String
   def emacBaseUrl: String
   def metrics: ServiceMetrics
   def http: HttpClientV2
 
-  def addKnownFacts(serviceName: String, knownFacts: JsValue, arn: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def addKnownFacts(serviceName: String, knownFacts: JsValue, arn: String)(using hc: HeaderCarrier): Future[HttpResponse] = {
 
     val agentRefIdentifier = "AgentRefNumber"
     val enrolmentKey = s"$serviceName~$agentRefIdentifier~$arn" // TODO: refactor to createEnrolmentKey method
@@ -74,7 +75,7 @@ trait TaxEnrolmentsConnector extends Auditable with Logging {
   private def auditAddKnownFacts(putUrl: String,
                                  serviceName: String,
                                  knownFacts: JsValue,
-                                 response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
+                                 response: HttpResponse)(using hc: HeaderCarrier): Unit = {
     val status = response.status match {
       case NO_CONTENT => EventTypes.Succeeded
       case _ => EventTypes.Failed
