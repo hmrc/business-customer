@@ -27,26 +27,26 @@ import scala.concurrent.ExecutionContext
 class DefaultBusinessRegistrationController @Inject()(
                                                       cc: ControllerComponents,
                                                       val desConnector: EtmpConnector
-                                                     )(implicit val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
+                                                     )(using val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
 
 @Singleton
 class SaBusinessRegistrationController @Inject()(
                                                   cc: ControllerComponents,
                                                   val desConnector: EtmpConnector
-                                                )(implicit val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
+                                                )(using val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
 
 @Singleton
 class AgentBusinessRegistrationController @Inject()(
                                                      cc: ControllerComponents,
                                                      val desConnector: EtmpConnector
-                                                   )(implicit val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
+                                                   )(using val ec: ExecutionContext) extends BackendController(cc) with BusinessRegistrationController
 
 trait BusinessRegistrationController extends BackendController {
 
-  implicit val ec: ExecutionContext
+  given ec: ExecutionContext
   def desConnector: EtmpConnector
 
-  def register(id: String): Action[AnyContent] = Action.async {
+  def register(@annotation.unused id: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.register(json).map { registerResponse =>

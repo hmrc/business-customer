@@ -19,14 +19,14 @@ package uk.gov.hmrc.controllers
 import connectors.EtmpConnector
 import controllers.BusinessRegistrationController
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -41,7 +41,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
     val cc: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
     class TestBusinessRegistrationController extends BackendController(cc) with BusinessRegistrationController {
-      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+      given ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
       val desConnector: EtmpConnector = mockDesConnector
     }
 
@@ -65,7 +65,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
               |"organisation":{"organisationName":"ACME"},"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},"isAnAgent":false,"isAGroup":false,"nonUKIdentification":
               |{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
             .stripMargin)
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
         val result: Future[Result] = controller.register(utr).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(OK)
       }
@@ -91,7 +91,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
               |    }
               }"""
             .stripMargin)
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
         val result: Future[Result] = controller.register(utr).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         contentType(result).get must be("text/plain")
       }
@@ -116,7 +116,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
             |    }
             |}"""
           .stripMargin)
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any())).thenReturn(Future.successful(registerSuccessResponse))
         val result: Future[Result] = controller.register(utr).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         contentAsJson(result) must be(successResponse)
       }
@@ -128,7 +128,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
             |"address":{"addressLine1":"111","addressLine2":"ABC Street","addressLine3":"ABC city","addressLine4":"ABC 123","countryCode":"UK"},
             |"isAnAgent":false,"isAGroup":false,"nonUKIdentification":{"idNumber":"id1","issuingInstitution":"HMRC","issuingCountryCode":"UK"}}"""
           .stripMargin)
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(matchFailureResponse))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any())).thenReturn(Future.successful(matchFailureResponse))
         val result: Future[Result] = controller.register(utr).apply(FakeRequest().withJsonBody(inputJsonForNUK))
         status(result) must be(NOT_FOUND)
         contentAsJson(result) must be(matchFailureResponse.json)
@@ -155,7 +155,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
             |}"""
           .stripMargin)
         val badRequestJson: JsValue = Json.parse("""{"reason" : "Bad Request"}""")
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any()))
           .thenReturn(
             Future.successful(
               HttpResponse(BAD_REQUEST,
@@ -189,7 +189,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
             |}"""
           .stripMargin)
         val serviceUnavailable: JsValue = Json.parse("""{"reason" : "Service unavailable"}""")
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any()))
           .thenReturn(
             Future.successful(
               HttpResponse(
@@ -224,7 +224,7 @@ class BusinessRegistrationControllerSpec extends PlaySpec with GuiceOneServerPer
             |}"""
           .stripMargin)
         val serverError: JsValue = Json.parse("""{"reason" : "Internal server error"}""")
-        when(mockDesConnector.register(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockDesConnector.register(ArgumentMatchers.any())(using ArgumentMatchers.any()))
           .thenReturn(
             Future.successful(
               HttpResponse(

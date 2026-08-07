@@ -21,20 +21,21 @@ import audit.Auditable
 import javax.inject.Inject
 import metrics.{MetricsEnum, ServiceMetrics}
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http._
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, EventTypes}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultGovernmentGatewayAdminConnector @Inject()(val servicesConfig: ServicesConfig,
                                                        val metrics: ServiceMetrics,
                                                        val http: HttpClientV2,
-                                                       val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends GovernmentGatewayAdminConnector {
+                                                       val auditConnector: AuditConnector)(using val ec: ExecutionContext) extends GovernmentGatewayAdminConnector {
   val serviceUrl: String = servicesConfig.baseUrl("government-gateway-admin")
   val ggaBaseUrl = s"$serviceUrl/government-gateway-admin/service"
   val audit: Audit = new Audit("business-customer", auditConnector)
@@ -42,13 +43,13 @@ class DefaultGovernmentGatewayAdminConnector @Inject()(val servicesConfig: Servi
 
 trait GovernmentGatewayAdminConnector extends Auditable with Logging {
 
-  implicit val ec: ExecutionContext
+  given ec: ExecutionContext
   def serviceUrl: String
   def ggaBaseUrl: String
   def metrics: ServiceMetrics
   def http: HttpClientV2
 
-  def addKnownFacts(serviceName: String, knownFacts: JsValue)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def addKnownFacts(serviceName: String, knownFacts: JsValue)(using hc: HeaderCarrier): Future[HttpResponse] = {
     val postUrl = s"$ggaBaseUrl/$serviceName/known-facts"
     val timerContext = metrics.startTimer(MetricsEnum.GG_ADMIN_ADD_KNOWN_FACTS)
     http.post(url"$postUrl").withBody(knownFacts).execute[HttpResponse].map{ response =>
@@ -67,7 +68,7 @@ trait GovernmentGatewayAdminConnector extends Auditable with Logging {
     }
   }
 
-  private def auditAddKnownFacts(serviceName: String, knownFacts: JsValue, response: HttpResponse)(implicit hc: HeaderCarrier): Unit = {
+  private def auditAddKnownFacts(serviceName: String, knownFacts: JsValue, response: HttpResponse)(using hc: HeaderCarrier): Unit = {
     val status: String = response.status match {
       case OK => EventTypes.Succeeded
       case _  => EventTypes.Failed

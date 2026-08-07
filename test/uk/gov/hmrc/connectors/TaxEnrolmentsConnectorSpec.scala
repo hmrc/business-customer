@@ -18,13 +18,13 @@ package uk.gov.hmrc.connectors
 
 import connectors.{DefaultTaxEnrolmentsConnector, TaxEnrolmentsConnector}
 import metrics.ServiceMetrics
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, SessionId}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 
 class TaxEnrolmentsConnectorSpec extends PlaySpec with ConnectorTest with GuiceOneServerPerSuite with MockitoSugar with BeforeAndAfterEach {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given hc: HeaderCarrier = HeaderCarrier()
 
   val metrics: ServiceMetrics = app.injector.instanceOf[ServiceMetrics]
   val auditConnector: AuditConnector = app.injector.instanceOf[AuditConnector]
@@ -51,7 +51,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with ConnectorTest with GuiceO
     val failureJson = Json.parse( """{"error":"Constraint error"}""")
 
     "for successful set of known facts, return response" in new Setup {
-      implicit val hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      given hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(requestBuilderExecute[HttpResponse]).thenReturn(Future.successful(HttpResponse(NO_CONTENT, successfulJson.toString)))
 
       val knownFacts: JsValue = Json.toJson("")
@@ -60,7 +60,7 @@ class TaxEnrolmentsConnectorSpec extends PlaySpec with ConnectorTest with GuiceO
     }
 
     "for unsuccessful call of known facts, return response" in new Setup {
-      implicit val hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
+      given hc: HeaderCarrier = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
       when(requestBuilderExecute[HttpResponse]).thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, failureJson.toString)))
 
       val knownFacts: JsValue = Json.toJson("")

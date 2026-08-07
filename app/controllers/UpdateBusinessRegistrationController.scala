@@ -27,26 +27,26 @@ import scala.concurrent.ExecutionContext
 class DefaultUpdateBusinessRegistrationController @Inject()(
                                                              cc: ControllerComponents,
                                                              val desConnector: EtmpConnector
-                                                           )(implicit val ec: ExecutionContext) extends BackendController(cc) with UpdateBusinessRegistrationController
+                                                           )(using val ec: ExecutionContext) extends BackendController(cc) with UpdateBusinessRegistrationController
 
 @Singleton
 class SaUpdateBusinessRegistrationController @Inject()(
                                                         cc: ControllerComponents,
                                                         val desConnector: EtmpConnector
-                                                      )(implicit val ec: ExecutionContext) extends BackendController(cc) with UpdateBusinessRegistrationController
+                                                      )(using val ec: ExecutionContext) extends BackendController(cc) with UpdateBusinessRegistrationController
 
 @Singleton
 class AgentUpdateBusinessRegistrationController @Inject()(
                                                            cc: ControllerComponents,
                                                            val desConnector: EtmpConnector
-                                                         )(implicit val ec: ExecutionContext)extends BackendController(cc) with UpdateBusinessRegistrationController
+                                                         )(using val ec: ExecutionContext)extends BackendController(cc) with UpdateBusinessRegistrationController
 
 trait UpdateBusinessRegistrationController extends BackendController {
 
-  implicit val ec: ExecutionContext
+  given ec: ExecutionContext
   def desConnector: EtmpConnector
 
-  def update(utr: String, safeId: String): Action[AnyContent] = Action.async {
+  def update(@annotation.unused utr: String, safeId: String): Action[AnyContent] = Action.async {
     implicit request =>
       val json = request.body.asJson.get
       desConnector.updateRegistrationDetails(safeId, json).map { updateResponse =>
